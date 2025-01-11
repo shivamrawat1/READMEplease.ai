@@ -1,1 +1,5 @@
-flask
+flask==2.3.2
+moviepy==1.0.3
+openai==0.27.8
+imageio[ffmpeg]==2.31.1
+python-dotenv==1.0.0
