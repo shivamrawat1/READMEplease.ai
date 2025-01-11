@@ -1,5 +1,5 @@
 from app import app
-from flask import redirect, request, url_for, session, jsonify, render_template_string
+from flask import redirect, request, url_for, session, jsonify, render_template
 from urllib.parse import urlencode
 import os
 import secrets
@@ -10,65 +10,6 @@ import base64
 GITHUB_CLIENT_ID = os.getenv("GITHUB_CLIENT_ID")
 GITHUB_CLIENT_SECRET = os.getenv("GITHUB_CLIENT_SECRET")
 GITHUB_REDIRECT_URI = os.getenv("GITHUB_REDIRECT_URI", "http://127.0.0.1:5000/github/callback")
-
-# HTML Template for repository selection
-REPO_TEMPLATE = """
-<!DOCTYPE html>
-<html>
-<head>
-    <title>GitHub README Generator</title>
-    <style>
-        body { font-family: Arial; max-width: 800px; margin: 40px auto; padding: 20px; }
-        select { width: 100%; padding: 10px; margin: 20px 0; font-size: 16px; }
-        button { background: #2ea44f; color: white; border: none; padding: 10px 20px; 
-                 font-size: 16px; cursor: pointer; border-radius: 6px; }
-        .message { margin: 20px 0; padding: 10px; border-radius: 4px; }
-        .error { background: #ffebee; color: #c62828; }
-        .success { background: #e8f5e9; color: #2e7d32; }
-    </style>
-</head>
-<body>
-    <h1>Select Repository</h1>
-    <div id="message"></div>
-    <select id="repoSelect">
-        {% for repo in repos %}
-            <option value="{{ repo.full_name }}">{{ repo.full_name }}</option>
-        {% endfor %}
-    </select>
-    <button onclick="generateReadme()">Generate README</button>
-
-    <script>
-        async function generateReadme() {
-            const repo = document.getElementById('repoSelect').value;
-            const [owner, name] = repo.split('/');
-            
-            try {
-                const response = await fetch('/github/update-readme', {
-                    method: 'POST',
-                    headers: {'Content-Type': 'application/json'},
-                    body: JSON.stringify({repo_owner: owner, repo_name: name})
-                });
-                
-                const data = await response.json();
-                const msg = document.getElementById('message');
-                
-                if (data.error) {
-                    msg.className = 'message error';
-                    msg.textContent = data.error;
-                } else {
-                    msg.className = 'message success';
-                    msg.innerHTML = `README PR created! <a href="${data.pr_url}" target="_blank">View PR</a>`;
-                }
-            } catch (error) {
-                const msg = document.getElementById('message');
-                msg.className = 'message error';
-                msg.textContent = 'An error occurred. Please try again.';
-            }
-        }
-    </script>
-</body>
-</html>
-"""
 
 @app.route("/")
 def index():
@@ -134,7 +75,7 @@ def show_repos():
             key=lambda x: x['full_name'].lower()
         )
         
-        return render_template_string(REPO_TEMPLATE, repos=repos)
+        return render_template('github.html', repos=repos)
     except Exception as e:
         return jsonify({"error": f"Failed to fetch repositories: {str(e)}"}), 500
 
