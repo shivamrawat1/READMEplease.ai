@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Magic Word Finder</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 2rem auto;
+            padding: 0 1rem;
+        }
+        .results {
+            margin-top: 2rem;
+        }
+        .occurrence {
+            padding: 0.5rem;
+            border-bottom: 1px solid #eee;
+        }
+        #status {
+            color: #666;
+            margin: 1rem 0;
+        }
+    </style>
+</head>
+<body>
+    <h1>Magic Word Finder</h1>
+
+    <form id="uploadForm">
+        <div>
+            <label for="audioFile">Select MP3 file:</label>
+            <input type="file" id="audioFile" accept=".mp3" required>
+        </div>
+        <div>
+            <label for="magicWord">Magic word:</label>
+            <input type="text" id="magicWord" required>
+        </div>
+        <button type="submit">Process</button>
+    </form>
+
+    <div id="status"></div>
+    <div id="results" class="results"></div>
+
+    <script>
+        document.getElementById('uploadForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+
+            const status = document.getElementById('status');
+            const results = document.getElementById('results');
+            const formData = new FormData();
+
+            formData.append('file', document.getElementById('audioFile').files[0]);
+            formData.append('magic_word', document.getElementById('magicWord').value);
+
+            status.textContent = 'Processing...';
+            results.innerHTML = '';
+
+            try {
+                const response = await fetch('/transcribe', {
+                    method: 'POST',
+                    body: formData
+                });
+
+                const data = await response.json();
+
+                if (response.ok) {
+                    status.textContent = `Found ${data.total} occurrences`;
+                    results.innerHTML = data.occurrences
+                        .map(o => `
+                            <div class="occurrence">
+                                <strong>${formatTime(o.timestamp)}</strong>: ${o.context}
+                            </div>
+                        `)
+                        .join('');
+                } else {
+                    status.textContent = `Error: ${data.error}`;
+                }
+            } catch (error) {
+                status.textContent = 'Error processing file';
+                console.error(error);
+            }
+        });
+
+        function formatTime(seconds) {
+            const minutes = Math.floor(seconds / 60);
+            const remainingSeconds = Math.floor(seconds % 60);
+            return `${minutes}:${remainingSeconds.toString().padStart(2, '0')}`;
+        }
+    </script>
+</body>
+</html>
