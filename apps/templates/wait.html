@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Please Wait</title>
+    <style>
+        body {
+            margin: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            background: #000;
+        }
+        video {
+            max-width: 100%;
+            height: auto;
+        }
+    </style>
+</head>
+<body>
+    <video autoplay loop controls>
+        <source src="{{ url_for('static', filename='oo_ee_a_e_a_Cat.mp4', _external=False) }}" type="video/mp4">
+        Your browser does not support the video tag.
+    </video>
+
+    <script>
+        // Force video to play
+        document.querySelector('video').play().catch(function(error) {
+            console.log("Video play failed:", error);
+        });
+    </script>
+</body>
+</html>
