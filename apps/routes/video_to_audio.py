@@ -2,6 +2,7 @@ import os
 import uuid
 from flask import Blueprint, request, jsonify, send_file
 from moviepy.editor import VideoFileClip
+from ..utils.transcription import transcribe_audio
 
 # Define the Blueprint
 video_to_audio_blueprint = Blueprint('video_to_audio', __name__)
@@ -43,22 +44,30 @@ def home():
 @video_to_audio_blueprint.route('/video_to_audio', methods=['POST'])
 def video_to_audio():
     """
-    Endpoint for converting a video file to an audio file.
-    Returns the audio file directly.
+    Endpoint for converting a video file to audio and generating transcription.
+    Returns both the audio file path and word-level transcription.
     """
     if 'video_file' not in request.files:
         return jsonify({"error": "No video file provided"}), 400
 
     video_file = request.files['video_file']
+    audio_path = None
 
     try:
         # Convert video to audio
         audio_path = convert_video_to_audio(video_file)
 
-        # Return the audio file
-        return send_file(audio_path, as_attachment=True)
+        # Generate transcription
+        transcription = transcribe_audio(audio_path)
+
+        return jsonify({
+            "audio_path": audio_path,
+            "transcription": transcription
+        })
 
     except Exception as e:
+        if audio_path and os.path.exists(audio_path):
+            os.remove(audio_path)
         return jsonify({"error": str(e)}), 500
 
     finally:

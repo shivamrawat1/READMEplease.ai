@@ -23,7 +23,9 @@ def test_video_to_audio():
     try:
         response_data = response.json()
         print("Response JSON:", response_data)
-        audio_path = response_data.get("audio_path")  # Use "audio_path" instead of "audio_url"
+
+        # Check audio path
+        audio_path = response_data.get("audio_path")
         if audio_path:
             print(f"Audio Path: {audio_path}")
             # Check if the file exists in the temporary directory
@@ -34,12 +36,16 @@ def test_video_to_audio():
                     with open(saved_audio_path, 'wb') as output_audio_file:
                         output_audio_file.write(temp_audio_file.read())
                 print(f"Audio file saved at: {saved_audio_path}")
-                return saved_audio_path
-            else:
-                print("Audio file not found at the specified path.")
-        else:
-            print("Audio path not found in the response.")
-        return None
+
+        # Check transcription
+        transcription = response_data.get("transcription")
+        if transcription:
+            print("\nTranscription Results:")
+            for word in transcription:
+                print(f"Word: {word['word']}, Start: {word['start']}, End: {word['end']}")
+
+        return response_data
+
     except Exception as e:
         print("Failed to parse response JSON:", e)
         return None
