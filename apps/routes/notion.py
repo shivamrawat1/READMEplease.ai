@@ -9,7 +9,8 @@ from notion_client import Client
 # Notion OAuth Configuration
 NOTION_CLIENT_ID = os.getenv("NOTION_CLIENT_ID")
 NOTION_CLIENT_SECRET = os.getenv("NOTION_CLIENT_SECRET")
-NOTION_REDIRECT_URI = os.getenv("NOTION_REDIRECT_URI", "http://127.0.0.1:5000/notion/callback")
+# Explicitly use HTTPS for Notion
+NOTION_REDIRECT_URI = os.getenv("NOTION_REDIRECT_URI", "https://127.0.0.1:5000/notion/callback")
 
 @app.route("/notion/login")
 def notion_login():
@@ -17,14 +18,20 @@ def notion_login():
     state = secrets.token_urlsafe(16)
     session['notion_oauth_state'] = state
     
+    # Basic OAuth parameters
     params = {
         "client_id": NOTION_CLIENT_ID,
         "redirect_uri": NOTION_REDIRECT_URI,
         "response_type": "code",
         "owner": "user",
-        "state": state
+        "state": state,
+        "scope": "read_content write_content" # Add scopes explicitly
     }
-    auth_url = f"https://api.notion.com/v1/oauth/authorize?{urlencode(params)}"
+    
+    auth_url = "https://api.notion.com/v1/oauth/authorize?" + urlencode(params)
+    print("Auth URL:", auth_url)
+    print("Redirect URI:", NOTION_REDIRECT_URI)
+    print("Client ID:", NOTION_CLIENT_ID)
     return redirect(auth_url)
 
 @app.route("/notion/callback")
@@ -114,3 +121,10 @@ def create_notion_content():
         return jsonify({"message": "Content created successfully!"})
     except Exception as e:
         return jsonify({"error": str(e)}), 500
+
+@app.route("/notion")
+def notion_index():
+    """Initial Notion endpoint."""
+    if 'notion_token' not in session:
+        return redirect(url_for('notion_login'))
+    return redirect(url_for('show_notion_pages'))
