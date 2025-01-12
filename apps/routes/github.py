@@ -9,7 +9,7 @@ import base64
 # GitHub OAuth Configuration
 GITHUB_CLIENT_ID = os.getenv("GITHUB_CLIENT_ID")
 GITHUB_CLIENT_SECRET = os.getenv("GITHUB_CLIENT_SECRET")
-GITHUB_REDIRECT_URI = os.getenv("GITHUB_REDIRECT_URI", "http://127.0.0.1:5000/github/callback")
+GITHUB_REDIRECT_URI = os.getenv("GITHUB_REDIRECT_URI", "https://127.0.0.1:5000/github/callback")
 
 @app.route("/")
 def index():
@@ -29,6 +29,7 @@ def github_login():
         "state": state
     }
     auth_url = f"https://github.com/login/oauth/authorize?{urlencode(params)}"
+    print("GitHub Auth URL:", auth_url)
     return redirect(auth_url)
 
 @app.route("/github/callback")
