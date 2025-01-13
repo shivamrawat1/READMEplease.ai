@@ -52,21 +52,43 @@
         <button type="submit">Process Video</button>
     </form>
 
-    {% if results %}
-    <div class="results">
-        <h2>Results for keyword: "{{ results.keyword }}"</h2>
-        
-        {% if results.success %}
-            {% for screenshot in results.screenshots %}
-            <div class="screenshot">
-                <p>Timestamp: {{ screenshot.timestamp }} seconds</p>
-                <img src="data:image/jpeg;base64,{{ screenshot.image_base64 }}" alt="Screenshot at {{ screenshot.timestamp }}s">
-            </div>
-            {% endfor %}
-        {% else %}
-            <p>Error: {{ results.error }}</p>
-        {% endif %}
+    <div id="results" class="results" style="display: none;">
+        <!-- Results will be populated here -->
     </div>
-    {% endif %}
+
+    <script>
+        // Check for results in localStorage when page loads
+        window.onload = function() {
+            const results = localStorage.getItem('processingResults');
+            if (results) {
+                const resultsData = JSON.parse(results);
+                displayResults(resultsData);
+                localStorage.removeItem('processingResults');
+            }
+        };
+
+        function displayResults(results) {
+            const resultsDiv = document.getElementById('results');
+            resultsDiv.style.display = 'block';
+            
+            if (results.success) {
+                resultsDiv.innerHTML = `
+                    <h2>Results for keyword: "${results.keyword}"</h2>
+                    ${results.screenshots.map(screenshot => `
+                        <div class="screenshot">
+                            <p>Timestamp: ${screenshot.timestamp} seconds</p>
+                            <img src="data:image/jpeg;base64,${screenshot.image_base64}" 
+                                 alt="Screenshot at ${screenshot.timestamp}s">
+                        </div>
+                    `).join('')}
+                `;
+            } else {
+                resultsDiv.innerHTML = `
+                    <h2>Error</h2>
+                    <p>${results.error}</p>
+                `;
+            }
+        }
+    </script>
 </body>
 </html> 
