@@ -1,7 +1,8 @@
 <!DOCTYPE html>
 <html>
+
 <head>
-    <title>Video Upload and Processing</title>
+    <title>Video Keyword Screenshot Generator</title>
     <style>
         body {
             font-family: Arial;
@@ -9,13 +10,17 @@
             margin: 40px auto;
             padding: 20px;
         }
+
         .form-group {
             margin: 20px 0;
         }
-        input, button {
+
+        input,
+        button {
             padding: 10px;
             margin: 5px 0;
         }
+
         button {
             background: #2ea44f;
             color: white;
@@ -23,16 +28,42 @@
             border-radius: 4px;
             cursor: pointer;
         }
+
         .results {
             margin-top: 20px;
         }
-        .screenshot {
-            margin: 20px 0;
+
+        .screenshots-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 20px;
+            padding: 20px;
         }
-        .screenshot img {
-            max-width: 100%;
+
+        .screenshot-card {
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            padding: 10px;
+            background: #fff;
+        }
+
+        .screenshot-card img {
+            width: 100%;
             height: auto;
+            border-radius: 4px;
         }
+
+        .timestamp {
+            color: #666;
+            font-size: 0.9em;
+            margin-top: 5px;
+        }
+
+        .word-context {
+            font-weight: bold;
+            color: #333;
+        }
+
         .debug-info {
             margin-top: 20px;
             background: #f9f9f9;
@@ -41,10 +72,11 @@
         }
     </style>
 </head>
+
 <body>
     <h1>Video Upload and Processing</h1>
 
-    <form action="/process_video" method="POST" enctype="multipart/form-data">
+    <form action="{{ url_for('process_video') }}" method="post" enctype="multipart/form-data">
         <div class="form-group">
             <label for="video">Select Video File:</label><br>
             <input type="file" id="video" name="video" accept="video/*" required>
@@ -63,15 +95,26 @@
     </div>
 
     {% if results %}
-    <div class="debug-info">
-        <h3>Debug Information</h3>
-        <pre>{{ results | tojson(indent=2) }}</pre>
+    {% if results.success %}
+    <h2>Found {{ results.total_matches }} matches for "{{ results.keyword }}"</h2>
+    <div class="screenshots-grid">
+        {% for screenshot in results.screenshots %}
+        <div class="screenshot-card">
+            <img src="data:image/jpeg;base64,{{ screenshot.image_base64 }}"
+                alt="Screenshot at {{ screenshot.timestamp }}s">
+            <div class="timestamp">Time: {{ "%.2f"|format(screenshot.timestamp) }}s</div>
+            <div class="word-context">Context: "{{ screenshot.word_context }}"</div>
+        </div>
+        {% endfor %}
     </div>
+    {% else %}
+    <div class="error">Error: {{ results.error }}</div>
+    {% endif %}
     {% endif %}
 
     <script>
         // Check for results in localStorage when page loads
-        window.onload = function() {
+        window.onload = function () {
             const results = localStorage.getItem('processingResults');
             if (results) {
                 const resultsData = JSON.parse(results);
@@ -87,13 +130,15 @@
             if (results.success) {
                 resultsDiv.innerHTML = `
                     <h2>Results for keyword: "${results.keyword}"</h2>
-                    ${results.screenshots.map(screenshot => `
-                        <div class="screenshot">
-                            <p>Timestamp: ${screenshot.timestamp} seconds</p>
-                            <img src="data:image/jpeg;base64,${screenshot.image_base64}"
-                                 alt="Screenshot at ${screenshot.timestamp}s">
-                        </div>
-                    `).join('')}
+                    <div class="screenshots-grid">
+                        ${results.screenshots.map(screenshot => `
+                            <div class="screenshot-card">
+                                <img src="data:image/jpeg;base64,${screenshot.image_base64}" alt="Screenshot">
+                                <div class="timestamp">Time: ${screenshot.timestamp.toFixed(2)}s</div>
+                                <div class="word-context">Context: "${screenshot.word_context}"</div>
+                            </div>
+                        `).join('')}
+                    </div>
                 `;
             } else {
                 resultsDiv.innerHTML = `
@@ -104,4 +149,5 @@
         }
     </script>
 </body>
+
 </html>
