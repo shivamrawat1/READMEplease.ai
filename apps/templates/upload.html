@@ -33,28 +33,41 @@
             max-width: 100%;
             height: auto;
         }
+        .debug-info {
+            margin-top: 20px;
+            background: #f9f9f9;
+            padding: 10px;
+            border: 1px solid #ddd;
+        }
     </style>
 </head>
 <body>
     <h1>Video Upload and Processing</h1>
-    
+
     <form action="/process_video" method="POST" enctype="multipart/form-data">
         <div class="form-group">
             <label for="video">Select Video File:</label><br>
             <input type="file" id="video" name="video" accept="video/*" required>
         </div>
-        
+
         <div class="form-group">
             <label for="keyword">Enter Keyword to Search:</label><br>
             <input type="text" id="keyword" name="keyword" required>
         </div>
-        
+
         <button type="submit">Process Video</button>
     </form>
 
     <div id="results" class="results" style="display: none;">
         <!-- Results will be populated here -->
     </div>
+
+    {% if results %}
+    <div class="debug-info">
+        <h3>Debug Information</h3>
+        <pre>{{ results | tojson(indent=2) }}</pre>
+    </div>
+    {% endif %}
 
     <script>
         // Check for results in localStorage when page loads
@@ -70,14 +83,14 @@
         function displayResults(results) {
             const resultsDiv = document.getElementById('results');
             resultsDiv.style.display = 'block';
-            
+
             if (results.success) {
                 resultsDiv.innerHTML = `
                     <h2>Results for keyword: "${results.keyword}"</h2>
                     ${results.screenshots.map(screenshot => `
                         <div class="screenshot">
                             <p>Timestamp: ${screenshot.timestamp} seconds</p>
-                            <img src="data:image/jpeg;base64,${screenshot.image_base64}" 
+                            <img src="data:image/jpeg;base64,${screenshot.image_base64}"
                                  alt="Screenshot at ${screenshot.timestamp}s">
                         </div>
                     `).join('')}
@@ -91,4 +104,4 @@
         }
     </script>
 </body>
-</html> 
+</html>
