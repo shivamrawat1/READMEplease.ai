@@ -3,13 +3,21 @@
 
 <head>
     <title>Video Documentation Generator</title>
+    <!-- Add Tailwind CSS via CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
     <style>
-        /* Add modern, minimal styling */
+        /* Dark theme colors */
         :root {
-            --primary-color: #2ea44f;
-            --bg-color: #f8f9fa;
-            --text-color: #333;
-            --border-color: #dee2e6;
+            --primary-color: #10B981;
+            --bg-color: #0F172A;
+            --text-color: #E2E8F0;
+            --border-color: #1E293B;
+            --section-bg: #1E293B;
+            --input-bg: #0F172A;
+            --description-color: #94A3B8;
+            --accent-color: #3B82F6;
+            --error-color: #EF4444;
+            --success-color: #10B981;
         }
 
         body {
@@ -18,66 +26,104 @@
             color: var(--text-color);
             background: var(--bg-color);
             margin: 0;
-            padding: 20px;
+            padding: 40px 20px;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
         }
 
         .container {
-            max-width: 800px;
+            max-width: 1000px;
             margin: 0 auto;
-            background: white;
-            padding: 2rem;
-            border-radius: 10px;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            background: var(--section-bg);
+            border: 1px solid var(--border-color);
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            padding: 2.5rem;
+            border-radius: 12px;
         }
 
-        h1 {
+        h1, h2 {
             color: var(--text-color);
-            font-size: 1.8rem;
-            margin-bottom: 2rem;
-            text-align: center;
+            font-weight: 600;
         }
 
         .form-section {
-            margin-bottom: 2rem;
-            padding: 1.5rem;
+            background: var(--input-bg);
             border: 1px solid var(--border-color);
-            border-radius: 8px;
+            transition: all 0.2s ease;
+            padding: 2rem;
+            margin-bottom: 2.5rem;
+            border-radius: 10px;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+        }
+
+        .form-section:hover {
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
         }
 
         .form-group {
-            margin-bottom: 1rem;
+            margin-bottom: 1.5rem;
         }
 
         label {
             display: block;
             margin-bottom: 0.5rem;
             font-weight: 500;
+            color: var(--text-color);
         }
 
         input[type="file"],
         input[type="text"] {
             width: 100%;
-            padding: 0.5rem;
+            padding: 0.75rem;
+            background: var(--input-bg);
             border: 1px solid var(--border-color);
             border-radius: 4px;
             font-size: 1rem;
+            color: var(--text-color);
+            transition: all 0.2s ease;
+        }
+
+        input[type="text"]:focus {
+            border-color: var(--accent-color);
+            box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.1);
         }
 
         .section-selector {
             display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+            grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
             gap: 1rem;
             margin: 1rem 0;
         }
 
         .section-checkbox {
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
+            background: var(--input-bg);
+            border: 1px solid var(--border-color);
+            padding: 1.25rem;
+            border-radius: 8px;
+            transition: all 0.2s ease;
+        }
+
+        .section-checkbox:hover {
+            border-color: var(--accent-color);
+            background: rgba(59, 130, 246, 0.1);
+        }
+
+        .section-checkbox label {
+            font-weight: 500;
+            margin-bottom: 0.5rem;
+        }
+
+        .section-description {
+            font-size: 0.875rem;
+            color: var(--description-color);
+            margin-top: 0.5rem;
         }
 
         button {
-            background: var(--primary-color);
+            background: var(--accent-color);
+            transition: all 0.2s ease;
+            box-shadow: 0 4px 12px rgba(59, 130, 246, 0.2);
             color: white;
             border: none;
             padding: 0.8rem 1.5rem;
@@ -85,17 +131,18 @@
             cursor: pointer;
             font-size: 1rem;
             width: 100%;
-            transition: background-color 0.2s;
         }
 
         button:hover {
-            background-color: #2c974b;
+            background: #2563EB;
         }
 
         .preview-tabs {
             display: flex;
             gap: 1rem;
             margin-bottom: 1rem;
+            border-bottom: 1px solid var(--border-color);
+            padding-bottom: 0.5rem;
         }
 
         .tab-button {
@@ -105,81 +152,503 @@
             cursor: pointer;
             border-bottom: 2px solid transparent;
             width: auto;
+            color: var(--description-color);
+            transition: all 0.3s ease;
         }
 
         .tab-button.active {
-            border-bottom-color: var(--primary-color);
-            color: var(--primary-color);
+            color: var(--accent-color);
+            border-bottom-color: var(--accent-color);
         }
 
         .preview-content {
-            background: white;
-            padding: 1rem;
+            background: var(--input-bg);
+            padding: 1.5rem;
             border-radius: 4px;
             border: 1px solid var(--border-color);
+            overflow-x: auto;
+            max-height: 600px;
+            overflow-y: auto;
+        }
+
+        .preview-content pre {
+            white-space: pre-wrap;
+            word-wrap: break-word;
+            color: var(--text-color);
+            margin: 0;
+            font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', 'Consolas', monospace;
+        }
+
+        .results-section {
+            margin-top: 2rem;
+            padding-top: 2rem;
+            border-top: 1px solid var(--border-color);
+        }
+
+        /* Scrollbar styling */
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: var(--input-bg);
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: var(--border-color);
+            border-radius: 4px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: var(--description-color);
+        }
+
+        .user-flow {
+            margin-bottom: 2.5rem;
+            padding: 1.25rem;
+            background: var(--input-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 10px;
+            color: var(--text-color);
+        }
+
+        .user-flow h2 {
+            color: var(--accent-color);
+            font-size: 1.2rem;
+            font-weight: 600;
+            margin-bottom: 1rem;
+        }
+
+        .user-flow ol {
+            margin: 0;
+            padding-left: 1.5rem;
+        }
+
+        .user-flow li {
+            margin: 0.5rem 0;
+        }
+
+        .section-checkbox {
+            background: var(--input-bg);
+            transition: all 0.2s;
+        }
+
+        .section-checkbox:hover {
+            border-color: var(--primary-color);
+            transform: translateY(-1px);
+        }
+
+        .section-checkbox input[type="checkbox"] {
+            accent-color: var(--primary-color);
+            width: 1.2rem;
+            height: 1.2rem;
+        }
+
+        .preview-content {
+            background: var(--input-bg);
+        }
+
+        .step-number {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 28px;
+            height: 28px;
+            background: var(--accent-color);
+            color: white;
+            border-radius: 50%;
+            font-size: 0.9rem;
+            margin-right: 0.5rem;
+        }
+
+        .form-section {
+            background: var(--section-bg);
+            border: 1px solid var(--border-color);
+            transition: all 0.2s;
+        }
+
+        .form-section:hover {
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+        }
+
+        input[type="file"],
+        input[type="text"] {
+            background: var(--input-bg);
+            color: var(--text-color);
+        }
+
+        .section-description {
+            color: var(--description-color);
+        }
+
+        /* Add required field indicator */
+        .required-field::after {
+            content: "*";
+            color: #DC2626;
+            margin-left: 4px;
+        }
+
+        .required-note {
+            font-size: 0.875rem;
+            color: #DC2626;
+            margin-top: 0.5rem;
+        }
+
+        /* Add error message styling */
+        .error-message {
+            color: #DC2626;
+            font-size: 0.875rem;
+            margin-top: 0.5rem;
+            display: none;
+        }
+
+        /* Update button styling */
+        button[type="submit"] {
+            background: var(--accent-color);
+            font-weight: 500;
+            letter-spacing: 0.025em;
+            padding: 1rem 2rem;
+        }
+
+        button[type="submit"]:hover {
+            background: #0284C7;
+        }
+
+        /* Add loading state */
+        .loading {
+            opacity: 0.7;
+            pointer-events: none;
+        }
+
+        .loading-spinner {
+            display: none;
+            margin-left: 8px;
+        }
+
+        .loading .loading-spinner {
+            display: inline-block;
+        }
+
+        /* Markdown rendering styles */
+        #rendered-preview {
+            color: var(--text-color);
+            line-height: 1.8;
+            font-size: 1rem;
+        }
+
+        #rendered-preview h1 {
+            font-size: 2.25rem;
+            font-weight: 700;
+            margin: 2rem 0 1.5rem;
+            padding-bottom: 0.5rem;
+            border-bottom: 2px solid var(--border-color);
+            color: var(--text-color);
+        }
+
+        #rendered-preview h2 {
+            font-size: 1.8rem;
+            font-weight: 600;
+            margin: 2rem 0 1rem;
+            color: var(--text-color);
+            padding-bottom: 0.3rem;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        #rendered-preview h3 {
+            font-size: 1.5rem;
+            font-weight: 600;
+            margin: 1.5rem 0 1rem;
+            color: var(--text-color);
+        }
+
+        #rendered-preview h4 {
+            font-size: 1.25rem;
+            font-weight: 600;
+            margin: 1.5rem 0 1rem;
+            color: var(--text-color);
+        }
+
+        #rendered-preview p {
+            margin: 1rem 0;
+            line-height: 1.8;
+        }
+
+        #rendered-preview code {
+            background: rgba(0, 0, 0, 0.1);
+            padding: 0.2rem 0.4rem;
+            border-radius: 4px;
+            font-family: 'Monaco', 'Menlo', monospace;
+            font-size: 0.9em;
+        }
+
+        #rendered-preview pre {
+            background: rgba(0, 0, 0, 0.1);
+            padding: 1rem;
+            border-radius: 6px;
+            overflow-x: auto;
+            margin: 1.5rem 0;
+        }
+
+        #rendered-preview pre code {
+            background: none;
+            padding: 0;
+            font-size: 0.9em;
+            color: var(--text-color);
+        }
+
+        #rendered-preview blockquote {
+            border-left: 4px solid var(--primary-color);
+            margin: 1.5rem 0;
+            padding: 0.5rem 0 0.5rem 1rem;
+            color: var(--description-color);
+        }
+
+        #rendered-preview ul, #rendered-preview ol {
+            margin: 1rem 0 1rem 2rem;
+        }
+
+        #rendered-preview li {
+            margin: 0.5rem 0;
+        }
+
+        #rendered-preview img {
+            max-width: 100%;
+            height: auto;
+            border-radius: 8px;
+            margin: 1.5rem 0;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        #rendered-preview table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 1.5rem 0;
+        }
+
+        #rendered-preview th, #rendered-preview td {
+            border: 1px solid var(--border-color);
+            padding: 0.75rem;
+            text-align: left;
+        }
+
+        #rendered-preview th {
+            background: rgba(0, 0, 0, 0.05);
+            font-weight: 600;
+        }
+
+        #rendered-preview tr:nth-child(even) {
+            background: rgba(0, 0, 0, 0.02);
+        }
+
+        #rendered-preview hr {
+            border: none;
+            border-top: 2px solid var(--border-color);
+            margin: 2rem 0;
+        }
+
+        #rendered-preview a {
+            color: var(--accent-color);
+            text-decoration: none;
+        }
+
+        #rendered-preview a:hover {
+            text-decoration: underline;
+        }
+
+        /* Style for inline code blocks */
+        #rendered-preview p code {
+            color: #E53E3E;
+            background: rgba(229, 62, 62, 0.1);
+        }
+
+        /* Style for code block titles */
+        #rendered-preview .code-title {
+            font-family: monospace;
+            font-size: 0.9em;
+            background: rgba(0, 0, 0, 0.2);
+            padding: 0.5rem 1rem;
+            border-radius: 6px 6px 0 0;
+            margin-bottom: -1.5rem;
+            color: var(--description-color);
+        }
+
+        /* Add shine effect to sections */
+        .form-section::before {
+            display: none;
+        }
+
+        /* Error message styling */
+        .error-message {
+            color: var(--error-color);
+            font-size: 0.875rem;
+            margin-top: 0.5rem;
+        }
+
+        /* Required field indicator */
+        .required-field::after {
+            content: '*';
+            color: var(--error-color);
+            margin-left: 4px;
+        }
+
+        /* Success states */
+        .success {
+            color: var(--success-color);
+        }
+
+        /* Loading spinner animation */
+        .loading-spinner {
+            border: 2px solid var(--border-color);
+            border-top: 2px solid var(--text-color);
+            border-radius: 50%;
+            width: 16px;
+            height: 16px;
+            animation: spin 1s linear infinite;
+            display: inline-block;
+            margin-left: 8px;
+            vertical-align: middle;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        /* Loading state for button */
+        #submit-btn.loading {
+            opacity: 0.7;
+            cursor: not-allowed;
+        }
+
+        /* Static icon for button */
+        .button-icon {
+            display: inline-block;
+            margin-left: 0.5rem;
+        }
+
+        #submit-btn:not(.loading) .loading-text {
+            display: none;
+        }
+
+        /* Add this with your other styles */
+        .text-description {
+            color: var(--description-color);
+            font-size: 0.95rem;
+            letter-spacing: 0.01em;
         }
     </style>
 </head>
 
 <body>
     <div class="container">
-        <h1>Documentation Generator</h1>
+        <h2 class="text-2xl mb-2 text-center">ReadMePlease.ai</h2>
+        <p class="text-sm text-center mb-6 text-description">Generate comprehensive documentation for your GitHub projects in few seconds.</p>
 
-        <form action="{{ url_for('process_video') }}" method="post" enctype="multipart/form-data" id="docForm">
+        <div class="user-flow mb-8">
+            <h2>How it works:</h2>
+            <ol>
+                <li>
+                    <span class="step-number">1</span>
+                    Enter your GitHub repository URL (required)
+                </li>
+                <li>
+                    <span class="step-number">2</span>
+                    Select at least one README section to generate (required)
+                </li>
+                <li>
+                    <span class="step-number">3</span>
+                    Optionally upload a project demo video (max 25MB) for visual documentation
+                </li>
+                <li>
+                    <span class="step-number">4</span>
+                    Click "Generate Documentation" and wait for the magic ✨
+                </li>
+                <li>
+                    <span class="step-number">5</span>
+                    Preview and download your generated README.md
+                </li>
+            </ol>
+        </div>
+
+        <form action="{{ url_for('process_video') }}" method="post" enctype="multipart/form-data" id="docForm" onsubmit="return validateForm()">
             <div class="form-section">
-                <h2>Video Upload</h2>
+                <h2 class="text-xl mb-4">GitHub Repository</h2>
                 <div class="form-group">
-                    <label for="video">Select Video File:</label>
-                    <input type="file" id="video" name="video" accept="video/*" required>
-                </div>
-            </div>
-
-            <div class="form-section">
-                <h2>GitHub Repository</h2>
-                <div class="form-group">
-                    <label for="repo_url">Repository URL:</label>
-                    <input type="text" id="repo_url" name="repo_url" placeholder="https://github.com/username/repo">
+                    <label for="repo_url" class="required-field">Repository URL:</label>
+                    <input type="text" id="repo_url" name="repo_url" placeholder="https://github.com/username/repo" required>
+                    <div class="error-message" id="repo-error">Please enter a valid GitHub repository URL</div>
                 </div>
 
                 <div class="form-group">
-                    <label>Select README Sections:</label>
+                    <label class="required-field">Select README Sections (at least one required):</label>
                     <div class="section-selector">
                         <div class="section-checkbox">
                             <input type="checkbox" id="installation" name="sections" value="installation">
                             <label for="installation">Installation</label>
+                            <div class="section-description">
+                                ⚙️ Project setup and dependencies
+                            </div>
                         </div>
                         <div class="section-checkbox">
                             <input type="checkbox" id="usage" name="sections" value="usage">
                             <label for="usage">Usage</label>
+                            <div class="section-description">
+                                🚀 Getting started and examples
+                            </div>
                         </div>
                         <div class="section-checkbox">
                             <input type="checkbox" id="api" name="sections" value="api">
                             <label for="api">API</label>
+                            <div class="section-description">
+                                🔌 Endpoints and integration
+                            </div>
                         </div>
                         <div class="section-checkbox">
                             <input type="checkbox" id="architecture" name="sections" value="architecture">
                             <label for="architecture">Architecture</label>
+                            <div class="section-description">
+                                ️ System design and components
+                            </div>
                         </div>
                         <div class="section-checkbox">
                             <input type="checkbox" id="contributing" name="sections" value="contributing">
                             <label for="contributing">Contributing</label>
+                            <div class="section-description">
+                                👥 Development guidelines
+                            </div>
                         </div>
                     </div>
+                    <div class="error-message" id="sections-error">Please select at least one section</div>
+                    <div class="required-note">* Required fields</div>
                 </div>
             </div>
 
-            <button type="submit">Generate Documentation</button>
+            <div class="form-section">
+                <h2 class="text-xl mb-4">Video Upload (Optional)</h2>
+                <div class="form-group">
+                    <label for="video">Select Video File:</label>
+                    <input type="file" id="video" name="video" accept="video/*">
+                    <div class="section-description">Upload a demo video to generate visual documentation (max 25MB)</div>
+                </div>
+            </div>
+
+            <button type="submit" id="submit-btn">
+                <span>Generate Documentation</span>
+                <span class="button-icon">📝</span>
+                <span class="loading-text">Processing...</span>
+            </button>
         </form>
 
         <!-- Results section -->
         {% if results %}
             <div class="results-section">
-                <button onclick="downloadMarkdown()" class="download-button">
+                <button onclick="downloadMarkdown()" class="download-button mb-6">
                     Download README.md
                 </button>
 
                 <div class="preview-tabs">
-                    <button onclick="showTab('rendered')" class="tab-button active">Rendered</button>
+                    <button onclick="showTab('rendered')" class="tab-button active">Rendered Preview</button>
                     <button onclick="showTab('raw')" class="tab-button">Raw Markdown</button>
                 </div>
 
@@ -187,7 +656,7 @@
                     {{ results.markdown_html | safe }}
                 </div>
                 <div id="raw-preview" class="preview-content" style="display: none;">
-                    <pre>{{ results.markdown_content }}</pre>
+                    <pre><code class="language-markdown">{{ results.markdown_content }}</code></pre>
                 </div>
             </div>
         {% endif %}
@@ -239,6 +708,52 @@
                 alert('Download failed. Please try again.');
             }
         }
+
+        // Update form validation to show loading state without animation
+        function validateForm() {
+            let isValid = true;
+            const repoUrl = document.getElementById('repo_url').value;
+            const sections = document.querySelectorAll('input[name="sections"]:checked');
+            
+            if (!repoUrl.match(/^https:\/\/github\.com\/[\w-]+\/[\w-]+$/)) {
+                document.getElementById('repo-error').style.display = 'block';
+                isValid = false;
+            } else {
+                document.getElementById('repo-error').style.display = 'none';
+            }
+            
+            if (sections.length === 0) {
+                document.getElementById('sections-error').style.display = 'block';
+                isValid = false;
+            } else {
+                document.getElementById('sections-error').style.display = 'none';
+            }
+            
+            if (isValid) {
+                const submitBtn = document.getElementById('submit-btn');
+                submitBtn.classList.add('loading');
+                submitBtn.disabled = true;
+            }
+            
+            return isValid;
+        }
+
+        // Add real-time validation for sections
+        document.querySelectorAll('input[name="sections"]').forEach(checkbox => {
+            checkbox.addEventListener('change', () => {
+                const sections = document.querySelectorAll('input[name="sections"]:checked');
+                if (sections.length > 0) {
+                    document.getElementById('sections-error').style.display = 'none';
+                }
+            });
+        });
+
+        // Add real-time validation for GitHub URL
+        document.getElementById('repo_url').addEventListener('input', (e) => {
+            if (e.target.value.match(/^https:\/\/github\.com\/[\w-]+\/[\w-]+$/)) {
+                document.getElementById('repo-error').style.display = 'none';
+            }
+        });
     </script>
 </body>
 

@@ -3,23 +3,49 @@
 <head>
     <title>Please Wait</title>
     <style>
+        :root {
+            --bg-color: #1E293B;
+            --text-color: #E2E8F0;
+            --accent-color: #0EA5E9;
+        }
+        
         body {
             margin: 0;
             display: flex;
             justify-content: center;
             align-items: center;
             min-height: 100vh;
-            background: #000;
+            background: var(--bg-color);
             flex-direction: column;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
         }
+
         video {
             max-width: 100%;
             height: auto;
+            border-radius: 8px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
         }
+
         .message {
-            color: white;
-            font-family: Arial, sans-serif;
+            color: var(--text-color);
             margin-top: 20px;
+            font-size: 1.1rem;
+        }
+
+        .spinner {
+            border: 3px solid rgba(255, 255, 255, 0.1);
+            border-top: 3px solid var(--accent-color);
+            border-radius: 50%;
+            width: 24px;
+            height: 24px;
+            animation: spin 1s linear infinite;
+            margin-top: 20px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
         }
     </style>
 </head>
@@ -30,6 +56,7 @@
     </video>
 
     <div class="message">Processing your video... Please wait.</div>
+    <div class="spinner"></div>
 
     <script>
         // Force video to play
@@ -43,9 +70,7 @@
                 .then(response => response.json())
                 .then(data => {
                     if (data.status === 'complete') {
-                        // Store results in localStorage
                         localStorage.setItem('processingResults', JSON.stringify(data.results));
-                        // Redirect to upload page
                         window.location.href = '/upload';
                     } else if (data.status === 'error') {
                         console.error('Processing error:', data.message);
@@ -57,7 +82,6 @@
                 });
         }
 
-        // Start checking progress
         setInterval(checkProgress, 2000);
     </script>
 </body>

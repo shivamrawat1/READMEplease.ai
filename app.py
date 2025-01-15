@@ -10,6 +10,7 @@ import base64
 from io import BytesIO
 from zipfile import ZipFile
 from typing import List
+import re
 
 # Import processing functions
 from apps.routes.audio_processing import extract_audio
@@ -64,21 +65,33 @@ def test_route():
 
 @app.route("/process_video", methods=["POST"])
 def process_video():
-    logger.debug("Starting video processing")
+    logger.debug("Starting processing")
     
     try:
-        # Process video and generate initial markdown
-        video_markdown = process_video_content(request)
-        if not video_markdown["success"]:
-            return render_template(
-                "upload.html",
-                results=video_markdown
-            )
-        
-        # Process GitHub repository if URL provided
+        # Get GitHub repository info first
         repo_url = request.form.get("repo_url")
         selected_sections = request.form.getlist("sections")
         
+        # Initialize video_markdown with a default successful state
+        video_markdown = {
+            "success": True,
+            "markdown_content": "",
+            "markdown_html": "",
+            "screenshots": [],
+            "has_screenshots": False,
+            "screenshot_count": 0
+        }
+        
+        # Process video only if it's uploaded
+        if "video" in request.files and request.files["video"].filename:
+            video_markdown = process_video_content(request)
+            if not video_markdown["success"]:
+                return render_template(
+                    "upload.html",
+                    results=video_markdown
+                )
+        
+        # Process GitHub repository (required)
         if repo_url and selected_sections:
             github_content = process_github_content(repo_url, selected_sections)
             if not github_content["success"]:
@@ -90,12 +103,17 @@ def process_video():
                     }
                 )
             
-            # Combine video markdown with GitHub sections
+            # Combine video markdown (if any) with GitHub sections
             final_markdown = combine_markdown_sections(video_markdown, github_content)
             return render_template("upload.html", results=final_markdown)
-        
-        # If no GitHub URL provided, return just the video markdown
-        return render_template("upload.html", results=video_markdown)
+        else:
+            return render_template(
+                "upload.html",
+                results={
+                    "success": False,
+                    "error": "GitHub repository URL and at least one section are required"
+                }
+            )
         
     except Exception as e:
         logger.exception("Error during processing")
@@ -201,38 +219,87 @@ def process_video_content(request) -> dict:
 def process_github_content(repo_url: str, sections: List[str]) -> dict:
     """Generate README sections from GitHub repository."""
     try:
+        logger.debug(f"Processing GitHub content for URL: {repo_url}")
+        
+        # Validate GitHub URL format
+        if not re.match(r'^https?://github\.com/[\w-]+/[\w-]+/?$', repo_url):
+            return {
+                "success": False,
+                "error": "Invalid GitHub URL format. Please provide a valid repository URL."
+            }
+        
         analyzer = GitHubAnalyzer(repo_url)
         sections_content = []
         
         for section in sections:
+            logger.debug(f"Generating section: {section}")
             result = analyzer.generate_section(section)
             if result["success"]:
                 sections_content.append(result["content"])
-                
+            else:
+                logger.error(f"Failed to generate section {section}: {result.get('error')}")
+        
+        if not sections_content:
+            return {
+                "success": False,
+                "error": "Failed to generate any sections. Please check if the repository is public and accessible."
+            }
+        
         return {
             "success": True,
             "sections": sections_content
         }
     except Exception as e:
+        logger.exception("Error processing GitHub content")
+        error_message = str(e)
+        if "rate limit" in error_message.lower():
+            return {
+                "success": False,
+                "error": "GitHub API rate limit reached. Please try again later or use a GitHub token."
+            }
+        elif "not found" in error_message.lower():
+            return {
+                "success": False,
+                "error": "Repository not found. Please check if the URL is correct and the repository is public."
+            }
         return {
             "success": False,
-            "error": str(e)
+            "error": f"Error accessing repository: {error_message}"
         }
 
 def combine_markdown_sections(video_content: dict, github_content: dict) -> dict:
     """Combine video markdown with GitHub sections."""
     try:
-        if not video_content.get("success", False) or not github_content.get("success", False):
-            return video_content if video_content.get("success", False) else github_content
+        if not github_content.get("success", False):
+            return github_content
         
-        combined_markdown = video_content["markdown_content"] + "\n\n"
+        # Start with video content if it exists
+        combined_markdown = ""
+        if video_content.get("markdown_content"):
+            combined_markdown = video_content["markdown_content"] + "\n\n"
+        
+        # Add GitHub sections
         for section in github_content.get("sections", []):
             combined_markdown += section + "\n\n"
+        
+        # Use more markdown extensions for better rendering
+        markdown_html = markdown.markdown(
+            combined_markdown,
+            extensions=[
+                'markdown.extensions.extra',
+                'markdown.extensions.codehilite',
+                'markdown.extensions.tables',
+                'markdown.extensions.toc',
+                'markdown.extensions.fenced_code',
+                'markdown.extensions.sane_lists'
+            ],
+            output_format='html5'
+        )
         
         return {
             "success": True,
             "markdown_content": combined_markdown,
-            "markdown_html": markdown.markdown(combined_markdown, extensions=['extra']),
+            "markdown_html": markdown_html,
             "screenshots": video_content.get("screenshots", []),
             "has_screenshots": video_content.get("has_screenshots", False),
             "screenshot_count": video_content.get("screenshot_count", 0)
