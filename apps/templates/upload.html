@@ -2,205 +2,820 @@
 <html>
 
 <head>
-    <title>Video Blog Generator</title>
+    <title>Video Documentation Generator</title>
+    <!-- Add Tailwind CSS via CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
     <style>
+        /* Dark theme colors */
+        :root {
+            --primary-color: #10B981;
+            --bg-color: #0F172A;
+            --text-color: #E2E8F0;
+            --border-color: #1E293B;
+            --section-bg: #1E293B;
+            --input-bg: #0F172A;
+            --description-color: #94A3B8;
+            --accent-color: #3B82F6;
+            --error-color: #EF4444;
+            --success-color: #10B981;
+        }
+
         body {
-            font-family: Arial;
-            max-width: 800px;
-            margin: 40px auto;
-            padding: 20px;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            line-height: 1.6;
+            color: var(--text-color);
+            background: var(--bg-color);
+            margin: 0;
+            padding: 40px 20px;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+        }
+
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+            background: var(--section-bg);
+            border: 1px solid var(--border-color);
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            padding: 2.5rem;
+            border-radius: 12px;
+        }
+
+        h1, h2 {
+            color: var(--text-color);
+            font-weight: 600;
+        }
+
+        .form-section {
+            background: var(--input-bg);
+            border: 1px solid var(--border-color);
+            transition: all 0.2s ease;
+            padding: 2rem;
+            margin-bottom: 2.5rem;
+            border-radius: 10px;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+        }
+
+        .form-section:hover {
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
         }
 
         .form-group {
-            margin: 20px 0;
+            margin-bottom: 1.5rem;
         }
 
-        input,
-        button {
-            padding: 10px;
-            margin: 5px 0;
+        label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 500;
+            color: var(--text-color);
+        }
+
+        input[type="file"],
+        input[type="text"] {
+            width: 100%;
+            padding: 0.75rem;
+            background: var(--input-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 4px;
+            font-size: 1rem;
+            color: var(--text-color);
+            transition: all 0.2s ease;
+        }
+
+        input[type="text"]:focus {
+            border-color: var(--accent-color);
+            box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.1);
+        }
+
+        .section-selector {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+            gap: 1rem;
+            margin: 1rem 0;
+        }
+
+        .section-checkbox {
+            background: var(--input-bg);
+            border: 1px solid var(--border-color);
+            padding: 1.25rem;
+            border-radius: 8px;
+            transition: all 0.2s ease;
+        }
+
+        .section-checkbox:hover {
+            border-color: var(--accent-color);
+            background: rgba(59, 130, 246, 0.1);
+        }
+
+        .section-checkbox label {
+            font-weight: 500;
+            margin-bottom: 0.5rem;
+        }
+
+        .section-description {
+            font-size: 0.875rem;
+            color: var(--description-color);
+            margin-top: 0.5rem;
         }
 
         button {
-            background: #2ea44f;
+            background: var(--accent-color);
+            transition: all 0.2s ease;
+            box-shadow: 0 4px 12px rgba(59, 130, 246, 0.2);
             color: white;
             border: none;
+            padding: 0.8rem 1.5rem;
             border-radius: 4px;
             cursor: pointer;
-        }
-
-        .results {
-            margin-top: 20px;
-        }
-
-        .screenshots-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-            gap: 20px;
-            padding: 20px;
-        }
-
-        .screenshot-card {
-            border: 1px solid #ddd;
-            border-radius: 8px;
-            padding: 10px;
-            background: #fff;
-        }
-
-        .screenshot-card img {
+            font-size: 1rem;
             width: 100%;
-            height: auto;
+        }
+
+        button:hover {
+            background: #2563EB;
+        }
+
+        .preview-tabs {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 1rem;
+            border-bottom: 1px solid var(--border-color);
+            padding-bottom: 0.5rem;
+        }
+
+        .tab-button {
+            background: none;
+            border: none;
+            padding: 0.5rem 1rem;
+            cursor: pointer;
+            border-bottom: 2px solid transparent;
+            width: auto;
+            color: var(--description-color);
+            transition: all 0.3s ease;
+        }
+
+        .tab-button.active {
+            color: var(--accent-color);
+            border-bottom-color: var(--accent-color);
+        }
+
+        .preview-content {
+            background: var(--input-bg);
+            padding: 1.5rem;
+            border-radius: 4px;
+            border: 1px solid var(--border-color);
+            overflow-x: auto;
+            max-height: 600px;
+            overflow-y: auto;
+        }
+
+        .preview-content pre {
+            white-space: pre-wrap;
+            word-wrap: break-word;
+            color: var(--text-color);
+            margin: 0;
+            font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', 'Consolas', monospace;
+        }
+
+        .results-section {
+            margin-top: 2rem;
+            padding-top: 2rem;
+            border-top: 1px solid var(--border-color);
+        }
+
+        /* Scrollbar styling */
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: var(--input-bg);
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: var(--border-color);
             border-radius: 4px;
         }
 
-        .timestamp {
-            color: #666;
+        ::-webkit-scrollbar-thumb:hover {
+            background: var(--description-color);
+        }
+
+        .user-flow {
+            margin-bottom: 2.5rem;
+            padding: 1.25rem;
+            background: var(--input-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 10px;
+            color: var(--text-color);
+        }
+
+        .user-flow h2 {
+            color: var(--accent-color);
+            font-size: 1.2rem;
+            font-weight: 600;
+            margin-bottom: 1rem;
+        }
+
+        .user-flow ol {
+            margin: 0;
+            padding-left: 1.5rem;
+        }
+
+        .user-flow li {
+            margin: 0.5rem 0;
+        }
+
+        .section-checkbox {
+            background: var(--input-bg);
+            transition: all 0.2s;
+        }
+
+        .section-checkbox:hover {
+            border-color: var(--primary-color);
+            transform: translateY(-1px);
+        }
+
+        .section-checkbox input[type="checkbox"] {
+            accent-color: var(--primary-color);
+            width: 1.2rem;
+            height: 1.2rem;
+        }
+
+        .preview-content {
+            background: var(--input-bg);
+        }
+
+        .step-number {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 28px;
+            height: 28px;
+            background: var(--accent-color);
+            color: white;
+            border-radius: 50%;
+            font-size: 0.9rem;
+            margin-right: 0.5rem;
+        }
+
+        .form-section {
+            background: var(--section-bg);
+            border: 1px solid var(--border-color);
+            transition: all 0.2s;
+        }
+
+        .form-section:hover {
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+        }
+
+        input[type="file"],
+        input[type="text"] {
+            background: var(--input-bg);
+            color: var(--text-color);
+        }
+
+        .section-description {
+            color: var(--description-color);
+        }
+
+        /* Add required field indicator */
+        .required-field::after {
+            content: "*";
+            color: #DC2626;
+            margin-left: 4px;
+        }
+
+        .required-note {
+            font-size: 0.875rem;
+            color: #DC2626;
+            margin-top: 0.5rem;
+        }
+
+        /* Add error message styling */
+        .error-message {
+            color: #DC2626;
+            font-size: 0.875rem;
+            margin-top: 0.5rem;
+            display: none;
+        }
+
+        /* Update button styling */
+        button[type="submit"] {
+            background: var(--accent-color);
+            font-weight: 500;
+            letter-spacing: 0.025em;
+            padding: 1rem 2rem;
+        }
+
+        button[type="submit"]:hover {
+            background: #0284C7;
+        }
+
+        /* Add loading state */
+        .loading {
+            opacity: 0.7;
+            pointer-events: none;
+        }
+
+        .loading-spinner {
+            display: none;
+            margin-left: 8px;
+        }
+
+        .loading .loading-spinner {
+            display: inline-block;
+        }
+
+        /* Markdown rendering styles */
+        #rendered-preview {
+            color: var(--text-color);
+            line-height: 1.8;
+            font-size: 1rem;
+        }
+
+        #rendered-preview h1 {
+            font-size: 2.25rem;
+            font-weight: 700;
+            margin: 2rem 0 1.5rem;
+            padding-bottom: 0.5rem;
+            border-bottom: 2px solid var(--border-color);
+            color: var(--text-color);
+        }
+
+        #rendered-preview h2 {
+            font-size: 1.8rem;
+            font-weight: 600;
+            margin: 2rem 0 1rem;
+            color: var(--text-color);
+            padding-bottom: 0.3rem;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        #rendered-preview h3 {
+            font-size: 1.5rem;
+            font-weight: 600;
+            margin: 1.5rem 0 1rem;
+            color: var(--text-color);
+        }
+
+        #rendered-preview h4 {
+            font-size: 1.25rem;
+            font-weight: 600;
+            margin: 1.5rem 0 1rem;
+            color: var(--text-color);
+        }
+
+        #rendered-preview p {
+            margin: 1rem 0;
+            line-height: 1.8;
+        }
+
+        #rendered-preview code {
+            background: rgba(0, 0, 0, 0.1);
+            padding: 0.2rem 0.4rem;
+            border-radius: 4px;
+            font-family: 'Monaco', 'Menlo', monospace;
             font-size: 0.9em;
-            margin-top: 5px;
         }
 
-        .word-context {
-            font-weight: bold;
-            color: #333;
+        #rendered-preview pre {
+            background: rgba(0, 0, 0, 0.1);
+            padding: 1rem;
+            border-radius: 6px;
+            overflow-x: auto;
+            margin: 1.5rem 0;
         }
 
-        .debug-info {
-            margin-top: 20px;
-            background: #f9f9f9;
-            padding: 10px;
-            border: 1px solid #ddd;
+        #rendered-preview pre code {
+            background: none;
+            padding: 0;
+            font-size: 0.9em;
+            color: var(--text-color);
         }
 
-        .blog-section {
-            margin: 2em 0;
-            padding: 20px;
-            background: #fff;
+        #rendered-preview blockquote {
+            border-left: 4px solid var(--primary-color);
+            margin: 1.5rem 0;
+            padding: 0.5rem 0 0.5rem 1rem;
+            color: var(--description-color);
+        }
+
+        #rendered-preview ul, #rendered-preview ol {
+            margin: 1rem 0 1rem 2rem;
+        }
+
+        #rendered-preview li {
+            margin: 0.5rem 0;
+        }
+
+        #rendered-preview img {
+            max-width: 100%;
+            height: auto;
             border-radius: 8px;
+            margin: 1.5rem 0;
             box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
         }
 
-        .screenshot-suggestions {
-            margin: 2em 0;
-            padding: 20px;
-            background: #f5f5f5;
-            border-radius: 8px;
+        #rendered-preview table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 1.5rem 0;
         }
 
-        .markdown {
-            line-height: 1.6;
+        #rendered-preview th, #rendered-preview td {
+            border: 1px solid var(--border-color);
+            padding: 0.75rem;
+            text-align: left;
         }
 
-        .blog-screenshot {
-            margin: 2em 0;
-            text-align: center;
+        #rendered-preview th {
+            background: rgba(0, 0, 0, 0.05);
+            font-weight: 600;
         }
 
-        .screenshot-image {
-            max-width: 100%;
-            border-radius: 8px;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        #rendered-preview tr:nth-child(even) {
+            background: rgba(0, 0, 0, 0.02);
         }
 
-        .screenshot-caption {
-            margin-top: 1em;
-            color: #666;
-            font-style: italic;
+        #rendered-preview hr {
+            border: none;
+            border-top: 2px solid var(--border-color);
+            margin: 2rem 0;
         }
 
-        .timestamp {
-            color: #999;
+        #rendered-preview a {
+            color: var(--accent-color);
+            text-decoration: none;
+        }
+
+        #rendered-preview a:hover {
+            text-decoration: underline;
+        }
+
+        /* Style for inline code blocks */
+        #rendered-preview p code {
+            color: #E53E3E;
+            background: rgba(229, 62, 62, 0.1);
+        }
+
+        /* Style for code block titles */
+        #rendered-preview .code-title {
+            font-family: monospace;
             font-size: 0.9em;
+            background: rgba(0, 0, 0, 0.2);
+            padding: 0.5rem 1rem;
+            border-radius: 6px 6px 0 0;
+            margin-bottom: -1.5rem;
+            color: var(--description-color);
+        }
+
+        /* Add shine effect to sections */
+        .form-section::before {
+            display: none;
+        }
+
+        /* Error message styling */
+        .error-message {
+            color: var(--error-color);
+            font-size: 0.875rem;
+            margin-top: 0.5rem;
+        }
+
+        /* Required field indicator */
+        .required-field::after {
+            content: '*';
+            color: var(--error-color);
+            margin-left: 4px;
+        }
+
+        /* Success states */
+        .success {
+            color: var(--success-color);
+        }
+
+        /* Loading spinner animation */
+        .loading-spinner {
+            border: 2px solid var(--border-color);
+            border-top: 2px solid var(--text-color);
+            border-radius: 50%;
+            width: 16px;
+            height: 16px;
+            animation: spin 1s linear infinite;
+            display: inline-block;
+            margin-left: 8px;
+            vertical-align: middle;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        /* Loading state for button */
+        #submit-btn.loading {
+            opacity: 0.7;
+            cursor: not-allowed;
+        }
+
+        /* Static icon for button */
+        .button-icon {
+            display: inline-block;
+            margin-left: 0.5rem;
+        }
+
+        #submit-btn:not(.loading) .loading-text {
+            display: none;
+        }
+
+        /* Add this with your other styles */
+        .text-description {
+            color: var(--description-color);
+            font-size: 0.95rem;
+            letter-spacing: 0.01em;
+        }
+
+        /* Results section styling */
+        .results-section {
+            margin-top: 2rem;
+        }
+
+        /* Download button styling */
+        .download-button {
+            background: #EF4444;  /* Red color that complements the theme */
+            color: white;
+            border: none;
+            padding: 1rem 2rem;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 1rem;
+            width: 100%;
+            transition: all 0.2s ease;
+            box-shadow: 0 4px 12px rgba(239, 68, 68, 0.2);
+            font-weight: 500;
+            letter-spacing: 0.025em;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 1.5rem;
+        }
+
+        .download-button:hover {
+            background: #DC2626;
+            transform: translateY(-1px);
+        }
+
+        .download-button::after {
+            content: "📥";
+            display: inline-block;
+            margin-left: 0.5rem;
+        }
+
+        /* Preview tabs should come after the button */
+        .preview-tabs {
+            margin-top: 0;
         }
     </style>
 </head>
 
 <body>
-    <h1>Video Upload and Processing</h1>
+    <div class="container">
+        <h2 class="text-2xl mb-2 text-center">ReadMePlease.ai</h2>
+        <p class="text-sm text-center mb-6 text-description">Generate comprehensive documentation for your GitHub projects in few seconds.</p>
 
-    <form action="{{ url_for('process_video') }}" method="post" enctype="multipart/form-data">
-        <div class="form-group">
-            <label for="video">Select Video File:</label><br>
-            <input type="file" id="video" name="video" accept="video/*" required>
+        <div class="user-flow mb-8">
+            <h2>How it works:</h2>
+            <ol>
+                <li>
+                    <span class="step-number">1</span>
+                    Enter your GitHub repository URL (required)
+                </li>
+                <li>
+                    <span class="step-number">2</span>
+                    Select at least one README section to generate (required)
+                </li>
+                <li>
+                    <span class="step-number">3</span>
+                    Optionally upload a project demo video (max 25MB) for visual documentation
+                </li>
+                <li>
+                    <span class="step-number">4</span>
+                    Click "Generate Documentation" and wait for the magic ✨
+                </li>
+                <li>
+                    <span class="step-number">5</span>
+                    Preview and download your generated README.md
+                </li>
+            </ol>
         </div>
-        <button type="submit">Generate Blog & Screenshots</button>
-    </form>
 
-    <div class="results">
-        {% if results and results.success %}
-            {% if results.has_screenshots %}
-                <div class="debug-info">
-                    Number of screenshots: {{ results.screenshot_count }}
+        <form action="{{ url_for('process_video') }}" method="post" enctype="multipart/form-data" id="docForm" onsubmit="return validateForm()">
+            <div class="form-section">
+                <h2 class="text-xl mb-4">GitHub Repository</h2>
+                <div class="form-group">
+                    <label for="repo_url" class="required-field">Repository URL:</label>
+                    <input type="text" id="repo_url" name="repo_url" placeholder="https://github.com/username/repo" required>
+                    <div class="error-message" id="repo-error">Please enter a valid GitHub repository URL</div>
                 </div>
-            {% else %}
-                <div class="debug-info">
-                    No screenshots were generated
+
+                <div class="form-group">
+                    <label class="required-field">Select README Sections (at least one required):</label>
+                    <div class="section-selector">
+                        <div class="section-checkbox">
+                            <input type="checkbox" id="toc" name="sections" value="toc">
+                            <label for="toc">Table of Contents</label>
+                            <div class="section-description">
+                                📑 Organized navigation of the documentation
+                            </div>
+                        </div>
+                        <div class="section-checkbox">
+                            <input type="checkbox" id="features" name="sections" value="features">
+                            <label for="features">Features</label>
+                            <div class="section-description">
+                                ⭐ Key capabilities and functionalities
+                            </div>
+                        </div>
+                        <div class="section-checkbox">
+                            <input type="checkbox" id="structure" name="sections" value="structure">
+                            <label for="structure">Project Structure</label>
+                            <div class="section-description">
+                                🗂️ Directory organization and architecture
+                            </div>
+                        </div>
+                        <div class="section-checkbox">
+                            <input type="checkbox" id="getting_started" name="sections" value="getting_started">
+                            <label for="getting_started">Getting Started</label>
+                            <div class="section-description">
+                                🚀 Installation and setup guide
+                            </div>
+                        </div>
+                        <div class="section-checkbox">
+                            <input type="checkbox" id="roadmap" name="sections" value="roadmap">
+                            <label for="roadmap">Roadmap</label>
+                            <div class="section-description">
+                                🗺️ Future plans and development
+                            </div>
+                        </div>
+                        <div class="section-checkbox">
+                            <input type="checkbox" id="contributing" name="sections" value="contributing">
+                            <label for="contributing">Contributing</label>
+                            <div class="section-description">
+                                🤝 Guidelines for contributors
+                            </div>
+                        </div>
+                        <div class="section-checkbox">
+                            <input type="checkbox" id="license" name="sections" value="license">
+                            <label for="license">License</label>
+                            <div class="section-description">
+                                📄 Project license information
+                            </div>
+                        </div>
+                        <div class="section-checkbox">
+                            <input type="checkbox" id="acknowledgments" name="sections" value="acknowledgments">
+                            <label for="acknowledgments">Acknowledgments</label>
+                            <div class="section-description">
+                                🙏 Credits and recognition
+                            </div>
+                        </div>
+                    </div>
+                    <div class="error-message" id="sections-error">Please select at least one section</div>
+                    <div class="required-note">* Required fields</div>
                 </div>
-            {% endif %}
-        <!-- Blog Content Section -->
-        <div class="blog-section">
-            <h2>Generated Blog Post</h2>
-            <div class="blog-content markdown">
-                {{ results.blog_content | safe }}
             </div>
-        </div>
 
-        <!-- Screenshot Suggestions -->
-        <div class="screenshot-suggestions">
-            <h2>Key Moments</h2>
-            <div class="suggestions-list">
-                {{ results.screenshot_suggestions | safe }}
+            <div class="form-section">
+                <h2 class="text-xl mb-4">Video Upload (Optional)</h2>
+                <div class="form-group">
+                    <label for="video">Select Video File:</label>
+                    <input type="file" id="video" name="video" accept="video/*">
+                    <div class="section-description">Upload a demo video to generate visual documentation (max 25MB)</div>
+                </div>
             </div>
-        </div>
 
-        <!-- Screenshots Grid -->
-        <div class="screenshots-grid">
-            {% for screenshot in results.screenshots %}
-            <div class="screenshot-card">
-                <img src="data:image/jpeg;base64,{{ screenshot.image_base64 }}"
-                    alt="Screenshot at {{ screenshot.timestamp }}s">
-                <div class="timestamp">Time: {{ "%.2f"|format(screenshot.timestamp) }}s</div>
-                <div class="word-context">{{ screenshot.reason }}</div>
+            <button type="submit" id="submit-btn">
+                <span>Generate Documentation</span>
+                <span class="button-icon">📝</span>
+                <span class="loading-text">Processing...</span>
+            </button>
+        </form>
+
+        <!-- Results section -->
+        {% if results %}
+            <div class="results-section">
+                <button onclick="downloadMarkdown()" class="download-button">
+                    Download README.md
+                </button>
+
+                <div class="preview-tabs">
+                    <button onclick="showTab('rendered')" class="tab-button active">Rendered Preview</button>
+                    <button onclick="showTab('raw')" class="tab-button">Raw Markdown</button>
+                </div>
+
+                <div id="rendered-preview" class="preview-content">
+                    {{ results.markdown_html | safe }}
+                </div>
+                <div id="raw-preview" class="preview-content" style="display: none;">
+                    <pre><code class="language-markdown">{{ results.markdown_content }}</code></pre>
+                </div>
             </div>
-            {% endfor %}
-        </div>
         {% endif %}
     </div>
 
     <script>
-        // Check for results in localStorage when page loads
-        window.onload = function () {
-            const results = localStorage.getItem('processingResults');
-            if (results) {
-                const resultsData = JSON.parse(results);
-                displayResults(resultsData);
-                localStorage.removeItem('processingResults');
-            }
-        };
+        // Existing JavaScript for preview tabs
+        function showTab(tabName) {
+            document.querySelectorAll('.tab-button').forEach(button => {
+                button.classList.remove('active');
+            });
+            event.target.classList.add('active');
+            
+            document.getElementById('rendered-preview').style.display = 
+                tabName === 'rendered' ? 'block' : 'none';
+            document.getElementById('raw-preview').style.display = 
+                tabName === 'raw' ? 'block' : 'none';
+        }
 
-        function displayResults(results) {
-            const resultsDiv = document.getElementById('results');
-            resultsDiv.style.display = 'block';
-
-            if (results.success) {
-                resultsDiv.innerHTML = `
-                    <h2>Results for keyword: "${results.keyword}"</h2>
-                    <div class="screenshots-grid">
-                        ${results.screenshots.map(screenshot => `
-                            <div class="screenshot-card">
-                                <img src="data:image/jpeg;base64,${screenshot.image_base64}" alt="Screenshot">
-                                <div class="timestamp">Time: ${screenshot.timestamp.toFixed(2)}s</div>
-                                <div class="word-context">Context: "${screenshot.word_context}"</div>
-                            </div>
-                        `).join('')}
-                    </div>
-                `;
-            } else {
-                resultsDiv.innerHTML = `
-                    <h2>Error</h2>
-                    <p>${results.error}</p>
-                `;
+        // Add download functionality
+        async function downloadMarkdown() {
+            try {
+                const response = await fetch('/download_markdown', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        markdown_content: {{ results.markdown_content | tojson if results and results.success else '""' }},
+                        screenshots: {{ results.screenshots | tojson if results and results.success else '[]' }}
+                    })
+                });
+                
+                if (response.ok) {
+                    const blob = await response.blob();
+                    const url = window.URL.createObjectURL(blob);
+                    const a = document.createElement('a');
+                    a.href = url;
+                    a.download = 'README.md';
+                    document.body.appendChild(a);
+                    a.click();
+                    window.URL.revokeObjectURL(url);
+                    a.remove();
+                } else {
+                    alert('Download failed. Please try again.');
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                alert('Download failed. Please try again.');
             }
         }
+
+        // Update form validation to show loading state without animation
+        function validateForm() {
+            let isValid = true;
+            const repoUrl = document.getElementById('repo_url').value;
+            const sections = document.querySelectorAll('input[name="sections"]:checked');
+            
+            if (!repoUrl.match(/^https:\/\/github\.com\/[\w-]+\/[\w-]+$/)) {
+                document.getElementById('repo-error').style.display = 'block';
+                isValid = false;
+            } else {
+                document.getElementById('repo-error').style.display = 'none';
+            }
+            
+            if (sections.length === 0) {
+                document.getElementById('sections-error').style.display = 'block';
+                isValid = false;
+            } else {
+                document.getElementById('sections-error').style.display = 'none';
+            }
+            
+            if (isValid) {
+                const submitBtn = document.getElementById('submit-btn');
+                submitBtn.classList.add('loading');
+                submitBtn.disabled = true;
+            }
+            
+            return isValid;
+        }
+
+        // Add real-time validation for sections
+        document.querySelectorAll('input[name="sections"]').forEach(checkbox => {
+            checkbox.addEventListener('change', () => {
+                const sections = document.querySelectorAll('input[name="sections"]:checked');
+                if (sections.length > 0) {
+                    document.getElementById('sections-error').style.display = 'none';
+                }
+            });
+        });
+
+        // Add real-time validation for GitHub URL
+        document.getElementById('repo_url').addEventListener('input', (e) => {
+            if (e.target.value.match(/^https:\/\/github\.com\/[\w-]+\/[\w-]+$/)) {
+                document.getElementById('repo-error').style.display = 'none';
+            }
+        });
     </script>
 </body>
 
