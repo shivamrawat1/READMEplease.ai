@@ -1,4 +1,4 @@
-from flask import Flask, render_template, request, redirect, url_for, jsonify
+from flask import Flask, render_template, request, redirect, url_for, session, jsonify, jsonify
 import logging
 from dotenv import load_dotenv
 import os
@@ -25,12 +25,17 @@ app = Flask(__name__,
            static_folder='apps/static')
 app.secret_key = os.getenv('FLASK_SECRET_KEY', 'dev')
 
+# Global variable to store processing results
+processing_results = {}
+
 @app.route('/')
 def index():
     return redirect(url_for('upload'))
 
 @app.route('/upload', methods=['GET'])
 def upload():
+    # Clear any previous results
+    session.pop('processing_id', None)
     return render_template('upload.html')
 
 @app.route('/test', methods=['GET'])
