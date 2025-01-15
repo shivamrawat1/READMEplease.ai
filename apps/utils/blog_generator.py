@@ -2,24 +2,33 @@ from openai import OpenAI
 import os
 
 
-def generate_blog_from_transcript(transcript_text: str) -> dict:
-    """Generate a blog post with screenshot markers."""
+def generate_blog_from_transcript(transcript_text: str, timestamps: list = None) -> dict:
+    """Generate a blog post with screenshot markers using actual timestamps."""
     try:
         client = OpenAI()
 
-        system_prompt = """You are an expert technical writer. When writing about technical
+        # Create timestamp guidance
+        timestamp_guidance = ""
+        if timestamps:
+            timestamp_str = ", ".join([f"{t:.2f}s" for t in timestamps])
+            timestamp_guidance = f"\nUse these exact timestamps for screenshots: {timestamp_str}"
+
+        system_prompt = f"""You are an expert technical writer. When writing about technical
         concepts or visual elements, mark where screenshots would be helpful using this format:
         [SCREENSHOT:timestamp:description]
 
-        For example: [SCREENSHOT:30:Example of the edge detection output showing clear ball boundaries]
+        Only use these exact timestamps for screenshots: {timestamp_guidance}
 
-        Add 3-5 such markers at key points in the explanation."""
+        Examples:
+        [SCREENSHOT:30.20:Example of the edge detection output]
+
+        Keep descriptions short and focused on visual elements."""
 
         response = client.chat.completions.create(
             model="gpt-4",
             messages=[
                 {"role": "system", "content": system_prompt},
-                {"role": "user", "content": f"Create a technical blog post from this transcript with appropriate screenshot markers:\n\n{transcript_text}"}
+                {"role": "user", "content": f"Create a technical blog post from this transcript with screenshot markers at the provided timestamps:\n\n{transcript_text}"}
             ],
             temperature=0.7,
         )

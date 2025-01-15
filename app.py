@@ -97,11 +97,24 @@ def process_video():
                     },
                 )
 
-            # Generate blog content and screenshots
-            full_transcript = " ".join(
-                [word["word"] for word in transcription["words"]]
+            # Get screenshots based on content analysis first
+            screenshot_suggestions = select_screenshot_moments(transcription["words"])
+            screenshots = []
+
+            logger.debug("Starting content-based screenshot generation")
+            if screenshot_suggestions["success"] and screenshot_suggestions.get("timestamps"):
+                logger.debug(f"Found {len(screenshot_suggestions['timestamps'])} meaningful moments")
+                screenshots = create_automated_screenshots(
+                    str(video_path),
+                    screenshot_suggestions["timestamps"]
+                )
+
+            # Generate blog content with actual timestamps
+            full_transcript = " ".join([word["word"] for word in transcription["words"]])
+            blog_result = generate_blog_from_transcript(
+                full_transcript,
+                timestamps=[s["timestamp"] for s in screenshots]
             )
-            blog_result = generate_blog_from_transcript(full_transcript)
 
             if not blog_result["success"]:
                 return render_template(
@@ -111,24 +124,6 @@ def process_video():
                         "error": f"Blog generation failed: {blog_result.get('error', 'Unknown error')}",
                     },
                 )
-
-            # Get screenshots
-            screenshot_suggestions = select_screenshot_moments(transcription["words"])
-            screenshots = []
-
-            logger.debug("Starting screenshot generation")
-            if screenshot_suggestions["success"] and screenshot_suggestions.get("timestamps"):
-                logger.debug(f"Found {len(screenshot_suggestions['timestamps'])} timestamps")
-                logger.debug(f"Video path exists: {os.path.exists(str(video_path))}")
-
-                screenshots = create_automated_screenshots(
-                    str(video_path),
-                    screenshot_suggestions["timestamps"]
-                )
-
-                logger.debug(f"Generated {len(screenshots)} screenshots")
-                if not screenshots:
-                    logger.warning("No screenshots were generated")
 
             # Generate complete HTML blog with embedded screenshots
             blog_html = generate_blog_html(blog_result["blog_content"], screenshots)
