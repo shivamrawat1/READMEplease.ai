@@ -10,9 +10,13 @@ notion-client==2.3.0
 httpx==0.28.1
 
 # Video/Image processing
-opencv-python==4.10.0.84
+opencv-python-headless==4.8.1.78
 moviepy==1.0.3
-imageio-ffmpeg==0.5.1
+imageio==2.31.6
+imageio-ffmpeg==0.4.9
+
+# OpenAI
+openai==1.6.1
 
 # Security
 pyOpenSSL==24.3.0
@@ -20,3 +24,4 @@ cryptography==44.0.0
 
 # Basic utilities
 numpy==2.0.2
+urllib3==2.3.0
