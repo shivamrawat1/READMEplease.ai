@@ -4,6 +4,7 @@ from dotenv import load_dotenv
 import os
 import tempfile
 from pathlib import Path
+import cv2
 
 # Import processing functions
 from apps.routes.audio_processing import extract_audio
