@@ -1,5 +1,5 @@
 
-# NosuAI - Markdown Generator with Embedded Text and Screenshots
+# READMEplease.ai - Markdown Generator with Embedded Text and Screenshots
 
 A Flask web application that generates Markdown documents by processing videos or GitHub repositories as input. The application transcribes speech using OpenAI Whisper, extracts screenshots at moments when specific keywords are spoken, and embeds both the text and screenshots into the Markdown document for seamless documentation.
 
@@ -8,6 +8,8 @@ A Flask web application that generates Markdown documents by processing videos o
 [![Procfile](https://img.shields.io/badge/Procfile-gray.svg?style=for-the-badge&logo=Procfile&logoColor=white)](https://devcenter.heroku.com/articles/procfile)
 
 ---
+
+Demo Video: [https://youtu.be/xHDUDiyhM9k](https://youtu.be/xHDUDiyhM9k)
 
 ## 🔗 Table of Contents
 
@@ -122,7 +124,7 @@ nosuai/
 
 - [x] Markdown generation from video inputs.
 - [x] Transcription and screenshot embedding.
-- [ ] Full GitHub repository processing with enhanced README generation.
+- [x] Full GitHub repository processing with enhanced README generation.
 - [ ] Support for multilingual transcription.
 - [ ] Enhanced UI for easier input selection and customization.
 
