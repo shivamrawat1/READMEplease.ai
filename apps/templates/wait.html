@@ -10,10 +10,16 @@
             align-items: center;
             min-height: 100vh;
             background: #000;
+            flex-direction: column;
         }
         video {
             max-width: 100%;
             height: auto;
+        }
+        .message {
+            color: white;
+            font-family: Arial, sans-serif;
+            margin-top: 20px;
         }
     </style>
 </head>
@@ -22,12 +28,37 @@
         <source src="{{ url_for('static', filename='oo_ee_a_e_a_Cat.mp4', _external=False) }}" type="video/mp4">
         Your browser does not support the video tag.
     </video>
+    
+    <div class="message">Processing your video... Please wait.</div>
 
     <script>
         // Force video to play
         document.querySelector('video').play().catch(function(error) {
             console.log("Video play failed:", error);
         });
+
+        // Check processing status every 2 seconds
+        function checkProgress() {
+            fetch('/check_progress')
+                .then(response => response.json())
+                .then(data => {
+                    if (data.status === 'complete') {
+                        // Store results in localStorage
+                        localStorage.setItem('processingResults', JSON.stringify(data.results));
+                        // Redirect to upload page
+                        window.location.href = '/upload';
+                    } else if (data.status === 'error') {
+                        console.error('Processing error:', data.message);
+                        window.location.href = '/upload';
+                    }
+                })
+                .catch(error => {
+                    console.error('Error checking progress:', error);
+                });
+        }
+
+        // Start checking progress
+        setInterval(checkProgress, 2000);
     </script>
 </body>
 </html>

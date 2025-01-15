@@ -1,0 +1,882 @@
+[
+  {
+    "word": "Hello",
+    "start": 0.0,
+    "end": 0.62
+  },
+  {
+    "word": "so",
+    "start": 0.66,
+    "end": 1.14
+  },
+  {
+    "word": "this",
+    "start": 1.14,
+    "end": 1.4
+  },
+  {
+    "word": "is",
+    "start": 1.4,
+    "end": 1.64
+  },
+  {
+    "word": "AndroAccess",
+    "start": 1.64,
+    "end": 2.06
+  },
+  {
+    "word": "It's",
+    "start": 2.32,
+    "end": 2.66
+  },
+  {
+    "word": "an",
+    "start": 2.66,
+    "end": 2.92
+  },
+  {
+    "word": "accessible",
+    "start": 2.92,
+    "end": 3.2
+  },
+  {
+    "word": "solution",
+    "start": 3.2,
+    "end": 3.8
+  },
+  {
+    "word": "for",
+    "start": 3.8,
+    "end": 4.24
+  },
+  {
+    "word": "visually",
+    "start": 4.24,
+    "end": 4.7
+  },
+  {
+    "word": "impaired",
+    "start": 4.7,
+    "end": 5.0
+  },
+  {
+    "word": "individuals",
+    "start": 5.0,
+    "end": 5.74
+  },
+  {
+    "word": "So",
+    "start": 6.48,
+    "end": 7.24
+  },
+  {
+    "word": "it",
+    "start": 7.24,
+    "end": 7.84
+  },
+  {
+    "word": "accepts",
+    "start": 7.84,
+    "end": 7.98
+  },
+  {
+    "word": "any",
+    "start": 7.98,
+    "end": 8.56
+  },
+  {
+    "word": "form",
+    "start": 8.56,
+    "end": 8.8
+  },
+  {
+    "word": "of",
+    "start": 8.8,
+    "end": 9.06
+  },
+  {
+    "word": "educational",
+    "start": 9.06,
+    "end": 9.5
+  },
+  {
+    "word": "content",
+    "start": 9.5,
+    "end": 10.26
+  },
+  {
+    "word": "whether",
+    "start": 10.32,
+    "end": 10.92
+  },
+  {
+    "word": "it",
+    "start": 10.92,
+    "end": 11.14
+  },
+  {
+    "word": "be",
+    "start": 11.14,
+    "end": 11.42
+  },
+  {
+    "word": "PDF",
+    "start": 11.42,
+    "end": 11.8
+  },
+  {
+    "word": "image",
+    "start": 12.54,
+    "end": 13.2
+  },
+  {
+    "word": "picture",
+    "start": 13.74,
+    "end": 14.28
+  },
+  {
+    "word": "video",
+    "start": 15.2,
+    "end": 15.72
+  },
+  {
+    "word": "or",
+    "start": 16.18,
+    "end": 16.6
+  },
+  {
+    "word": "just",
+    "start": 16.6,
+    "end": 16.88
+  },
+  {
+    "word": "plain",
+    "start": 16.88,
+    "end": 17.1
+  },
+  {
+    "word": "text",
+    "start": 17.1,
+    "end": 17.34
+  },
+  {
+    "word": "and",
+    "start": 17.42,
+    "end": 17.58
+  },
+  {
+    "word": "it",
+    "start": 17.58,
+    "end": 17.92
+  },
+  {
+    "word": "converts",
+    "start": 17.92,
+    "end": 18.16
+  },
+  {
+    "word": "them",
+    "start": 18.16,
+    "end": 18.6
+  },
+  {
+    "word": "into",
+    "start": 18.6,
+    "end": 18.96
+  },
+  {
+    "word": "accessible",
+    "start": 18.96,
+    "end": 19.34
+  },
+  {
+    "word": "content",
+    "start": 19.34,
+    "end": 20.22
+  },
+  {
+    "word": "form",
+    "start": 20.22,
+    "end": 20.52
+  },
+  {
+    "word": "Let's",
+    "start": 20.72,
+    "end": 21.16
+  },
+  {
+    "word": "start",
+    "start": 21.16,
+    "end": 21.3
+  },
+  {
+    "word": "with",
+    "start": 21.3,
+    "end": 21.44
+  },
+  {
+    "word": "the",
+    "start": 21.44,
+    "end": 21.62
+  },
+  {
+    "word": "text",
+    "start": 21.62,
+    "end": 21.82
+  },
+  {
+    "word": "example",
+    "start": 21.82,
+    "end": 22.24
+  },
+  {
+    "word": "So",
+    "start": 23.26,
+    "end": 23.38
+  },
+  {
+    "word": "I'll",
+    "start": 23.38,
+    "end": 23.86
+  },
+  {
+    "word": "say",
+    "start": 23.86,
+    "end": 24.18
+  },
+  {
+    "word": "hello",
+    "start": 24.18,
+    "end": 24.48
+  },
+  {
+    "word": "or",
+    "start": 25.0,
+    "end": 25.52
+  },
+  {
+    "word": "I'll",
+    "start": 25.52,
+    "end": 26.54
+  },
+  {
+    "word": "give",
+    "start": 26.54,
+    "end": 26.74
+  },
+  {
+    "word": "a",
+    "start": 26.74,
+    "end": 26.92
+  },
+  {
+    "word": "smiley",
+    "start": 26.92,
+    "end": 27.44
+  },
+  {
+    "word": "and",
+    "start": 27.44,
+    "end": 27.78
+  },
+  {
+    "word": "I",
+    "start": 27.78,
+    "end": 27.96
+  },
+  {
+    "word": "can",
+    "start": 27.96,
+    "end": 28.14
+  },
+  {
+    "word": "convert",
+    "start": 28.14,
+    "end": 28.42
+  },
+  {
+    "word": "it",
+    "start": 28.42,
+    "end": 28.7
+  },
+  {
+    "word": "into",
+    "start": 28.7,
+    "end": 28.86
+  },
+  {
+    "word": "audio",
+    "start": 28.86,
+    "end": 29.32
+  },
+  {
+    "word": "or",
+    "start": 29.32,
+    "end": 30.12
+  },
+  {
+    "word": "braille",
+    "start": 30.12,
+    "end": 30.42
+  },
+  {
+    "word": "So",
+    "start": 30.6,
+    "end": 30.72
+  },
+  {
+    "word": "let's",
+    "start": 30.72,
+    "end": 31.0
+  },
+  {
+    "word": "convert",
+    "start": 31.0,
+    "end": 31.18
+  },
+  {
+    "word": "it",
+    "start": 31.18,
+    "end": 31.4
+  },
+  {
+    "word": "into",
+    "start": 31.4,
+    "end": 31.6
+  },
+  {
+    "word": "braille",
+    "start": 31.6,
+    "end": 31.78
+  },
+  {
+    "word": "first",
+    "start": 31.78,
+    "end": 32.66
+  },
+  {
+    "word": "and",
+    "start": 32.88,
+    "end": 33.04
+  },
+  {
+    "word": "it",
+    "start": 33.04,
+    "end": 33.22
+  },
+  {
+    "word": "will",
+    "start": 33.22,
+    "end": 33.46
+  },
+  {
+    "word": "show",
+    "start": 33.46,
+    "end": 33.76
+  },
+  {
+    "word": "a",
+    "start": 33.76,
+    "end": 34.3
+  },
+  {
+    "word": "braille",
+    "start": 34.3,
+    "end": 34.3
+  },
+  {
+    "word": "output",
+    "start": 34.3,
+    "end": 34.8
+  },
+  {
+    "word": "right",
+    "start": 34.8,
+    "end": 35.24
+  },
+  {
+    "word": "over",
+    "start": 35.24,
+    "end": 35.46
+  },
+  {
+    "word": "there",
+    "start": 35.46,
+    "end": 36.16
+  },
+  {
+    "word": "And",
+    "start": 36.36,
+    "end": 36.78
+  },
+  {
+    "word": "if",
+    "start": 36.78,
+    "end": 37.02
+  },
+  {
+    "word": "it",
+    "start": 37.02,
+    "end": 37.3
+  },
+  {
+    "word": "was",
+    "start": 37.3,
+    "end": 37.52
+  },
+  {
+    "word": "a",
+    "start": 37.52,
+    "end": 38.2
+  },
+  {
+    "word": "lowercase",
+    "start": 38.2,
+    "end": 38.56
+  },
+  {
+    "word": "letter",
+    "start": 38.56,
+    "end": 38.94
+  },
+  {
+    "word": "and",
+    "start": 39.32,
+    "end": 39.72
+  },
+  {
+    "word": "it",
+    "start": 39.72,
+    "end": 39.88
+  },
+  {
+    "word": "would",
+    "start": 39.88,
+    "end": 40.04
+  },
+  {
+    "word": "have",
+    "start": 40.04,
+    "end": 40.26
+  },
+  {
+    "word": "a",
+    "start": 40.26,
+    "end": 41.32
+  },
+  {
+    "word": "different",
+    "start": 41.32,
+    "end": 41.66
+  },
+  {
+    "word": "braille",
+    "start": 41.66,
+    "end": 42.0
+  },
+  {
+    "word": "to",
+    "start": 42.0,
+    "end": 43.06
+  },
+  {
+    "word": "correspond",
+    "start": 43.06,
+    "end": 43.34
+  },
+  {
+    "word": "to",
+    "start": 43.34,
+    "end": 43.6
+  },
+  {
+    "word": "that",
+    "start": 43.6,
+    "end": 43.84
+  },
+  {
+    "word": "And",
+    "start": 43.9,
+    "end": 44.12
+  },
+  {
+    "word": "if",
+    "start": 44.12,
+    "end": 44.28
+  },
+  {
+    "word": "we",
+    "start": 44.28,
+    "end": 44.42
+  },
+  {
+    "word": "want",
+    "start": 44.42,
+    "end": 44.62
+  },
+  {
+    "word": "to",
+    "start": 44.62,
+    "end": 45.1
+  },
+  {
+    "word": "convert",
+    "start": 45.1,
+    "end": 45.1
+  },
+  {
+    "word": "the",
+    "start": 45.1,
+    "end": 45.38
+  },
+  {
+    "word": "text",
+    "start": 45.38,
+    "end": 45.62
+  },
+  {
+    "word": "to",
+    "start": 45.62,
+    "end": 45.96
+  },
+  {
+    "word": "audio",
+    "start": 45.96,
+    "end": 46.38
+  },
+  {
+    "word": "it",
+    "start": 48.3,
+    "end": 48.8
+  },
+  {
+    "word": "will",
+    "start": 48.8,
+    "end": 49.08
+  },
+  {
+    "word": "have",
+    "start": 49.08,
+    "end": 49.34
+  },
+  {
+    "word": "it",
+    "start": 49.34,
+    "end": 49.84
+  },
+  {
+    "word": "Yeah",
+    "start": 52.4,
+    "end": 52.96
+  },
+  {
+    "word": "and",
+    "start": 52.98,
+    "end": 53.44
+  },
+  {
+    "word": "we",
+    "start": 53.44,
+    "end": 53.56
+  },
+  {
+    "word": "can",
+    "start": 53.56,
+    "end": 53.72
+  },
+  {
+    "word": "also",
+    "start": 53.72,
+    "end": 54.1
+  },
+  {
+    "word": "do",
+    "start": 54.1,
+    "end": 54.6
+  },
+  {
+    "word": "something",
+    "start": 54.6,
+    "end": 55.08
+  },
+  {
+    "word": "similar",
+    "start": 55.08,
+    "end": 55.46
+  },
+  {
+    "word": "with",
+    "start": 55.46,
+    "end": 56.1
+  },
+  {
+    "word": "a",
+    "start": 57.0,
+    "end": 57.56
+  },
+  {
+    "word": "PDF",
+    "start": 57.56,
+    "end": 57.56
+  },
+  {
+    "word": "or",
+    "start": 57.56,
+    "end": 58.28
+  },
+  {
+    "word": "a",
+    "start": 58.28,
+    "end": 58.74
+  },
+  {
+    "word": "TXT",
+    "start": 58.74,
+    "end": 58.94
+  },
+  {
+    "word": "file",
+    "start": 58.94,
+    "end": 59.42
+  },
+  {
+    "word": "So",
+    "start": 59.6,
+    "end": 60.16
+  },
+  {
+    "word": "we",
+    "start": 60.16,
+    "end": 60.26
+  },
+  {
+    "word": "have",
+    "start": 60.26,
+    "end": 60.5
+  },
+  {
+    "word": "the",
+    "start": 60.5,
+    "end": 60.88
+  },
+  {
+    "word": "PDF",
+    "start": 60.88,
+    "end": 60.96
+  },
+  {
+    "word": "and",
+    "start": 61.16,
+    "end": 61.32
+  },
+  {
+    "word": "we",
+    "start": 61.32,
+    "end": 61.48
+  },
+  {
+    "word": "want",
+    "start": 61.48,
+    "end": 61.7
+  },
+  {
+    "word": "to",
+    "start": 61.7,
+    "end": 62.16
+  },
+  {
+    "word": "upload",
+    "start": 62.16,
+    "end": 62.16
+  },
+  {
+    "word": "and",
+    "start": 62.16,
+    "end": 62.48
+  },
+  {
+    "word": "extract",
+    "start": 62.48,
+    "end": 62.64
+  },
+  {
+    "word": "the",
+    "start": 62.64,
+    "end": 63.14
+  },
+  {
+    "word": "text",
+    "start": 63.14,
+    "end": 63.14
+  },
+  {
+    "word": "So",
+    "start": 63.64,
+    "end": 63.66
+  },
+  {
+    "word": "it",
+    "start": 63.66,
+    "end": 63.98
+  },
+  {
+    "word": "populates",
+    "start": 64.5,
+    "end": 64.5
+  },
+  {
+    "word": "all",
+    "start": 64.5,
+    "end": 64.8
+  },
+  {
+    "word": "the",
+    "start": 64.8,
+    "end": 64.92
+  },
+  {
+    "word": "text",
+    "start": 64.92,
+    "end": 65.1
+  },
+  {
+    "word": "we",
+    "start": 65.1,
+    "end": 65.32
+  },
+  {
+    "word": "have",
+    "start": 65.32,
+    "end": 65.6
+  },
+  {
+    "word": "over",
+    "start": 65.6,
+    "end": 65.92
+  },
+  {
+    "word": "here",
+    "start": 65.92,
+    "end": 66.2
+  },
+  {
+    "word": "and",
+    "start": 66.2,
+    "end": 67.06
+  },
+  {
+    "word": "it",
+    "start": 67.06,
+    "end": 67.24
+  },
+  {
+    "word": "can",
+    "start": 67.24,
+    "end": 67.4
+  },
+  {
+    "word": "convert",
+    "start": 67.4,
+    "end": 67.78
+  },
+  {
+    "word": "the",
+    "start": 67.78,
+    "end": 68.0
+  },
+  {
+    "word": "same",
+    "start": 68.0,
+    "end": 68.24
+  },
+  {
+    "word": "thing",
+    "start": 68.24,
+    "end": 68.42
+  },
+  {
+    "word": "into",
+    "start": 68.42,
+    "end": 68.72
+  },
+  {
+    "word": "braille",
+    "start": 68.72,
+    "end": 68.98
+  },
+  {
+    "word": "and",
+    "start": 69.14,
+    "end": 69.7
+  },
+  {
+    "word": "in",
+    "start": 69.7,
+    "end": 69.96
+  },
+  {
+    "word": "the",
+    "start": 69.96,
+    "end": 70.14
+  },
+  {
+    "word": "same",
+    "start": 70.14,
+    "end": 70.46
+  },
+  {
+    "word": "format",
+    "start": 70.46,
+    "end": 70.52
+  },
+  {
+    "word": "that",
+    "start": 70.52,
+    "end": 70.9
+  },
+  {
+    "word": "it",
+    "start": 70.9,
+    "end": 71.18
+  },
+  {
+    "word": "is",
+    "start": 71.18,
+    "end": 71.46
+  },
+  {
+    "word": "in",
+    "start": 71.46,
+    "end": 71.58
+  },
+  {
+    "word": "the",
+    "start": 71.58,
+    "end": 72.1
+  },
+  {
+    "word": "PDF",
+    "start": 72.1,
+    "end": 72.1
+  },
+  {
+    "word": "it",
+    "start": 72.14,
+    "end": 72.42
+  },
+  {
+    "word": "preserves",
+    "start": 72.42,
+    "end": 72.64
+  },
+  {
+    "word": "the",
+    "start": 72.64,
+    "end": 72.92
+  },
+  {
+    "word": "format",
+    "start": 72.92,
+    "end": 73.16
+  }
+]
