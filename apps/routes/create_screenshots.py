@@ -2,12 +2,16 @@ import cv2
 import base64
 import json
 import logging
+import re
 from pathlib import Path
 import numpy as np
 
 logger = logging.getLogger(__name__)
 
-def create_screenshots_for_keyword(video_path: str, transcription_path: str, keyword: str) -> dict:
+
+def create_screenshots_for_keyword(
+    video_path: str, transcription_path: str, keyword: str
+) -> dict:
     """
     Create screenshots from a video at timestamps when a specific keyword is spoken.
 
@@ -21,7 +25,7 @@ def create_screenshots_for_keyword(video_path: str, transcription_path: str, key
     """
     try:
         # Read the transcription file
-        with open(transcription_path, 'r') as f:
+        with open(transcription_path, "r") as f:
             transcription = json.load(f)
 
         # Open the video
@@ -34,29 +38,36 @@ def create_screenshots_for_keyword(video_path: str, transcription_path: str, key
         fps = video.get(cv2.CAP_PROP_FPS)
         duration = total_frames / fps
 
-        logger.debug(f"Video duration: {duration}s, FPS: {fps}, Total frames: {total_frames}")
+        logger.debug(
+            f"Video duration: {duration}s, FPS: {fps}, Total frames: {total_frames}"
+        )
 
-        # Find all instances of the keyword
+        # Create regex pattern for strict word boundary matching
+        pattern = r"\b" + re.escape(keyword) + r"\b"
+        regex = re.compile(pattern, re.IGNORECASE)
+
+        # Find all instances of the keyword using regex
         keyword_instances = [
-            word for word in transcription
-            if keyword.lower() in word['word'].lower()
+            word for word in transcription if regex.search(word["word"])
         ]
 
         if not keyword_instances:
             return {
                 "success": False,
                 "error": f"Keyword '{keyword}' not found in transcription",
-                "screenshots": []
+                "screenshots": [],
             }
 
         screenshots = []
 
         for instance in keyword_instances:
-            timestamp = float(instance['start'])
+            timestamp = float(instance["start"])
 
             # Check if timestamp is within video bounds
             if timestamp > duration:
-                logger.warning(f"Timestamp {timestamp}s exceeds video duration {duration}s")
+                logger.warning(
+                    f"Timestamp {timestamp}s exceeds video duration {duration}s"
+                )
                 continue
 
             # Calculate frame number
@@ -76,14 +87,16 @@ def create_screenshots_for_keyword(video_path: str, transcription_path: str, key
                     frame = cv2.resize(frame, None, fx=scale, fy=scale)
 
                 # Convert frame to jpg
-                _, buffer = cv2.imencode('.jpg', frame, [cv2.IMWRITE_JPEG_QUALITY, 85])
-                base64_image = base64.b64encode(buffer).decode('utf-8')
+                _, buffer = cv2.imencode(".jpg", frame, [cv2.IMWRITE_JPEG_QUALITY, 85])
+                base64_image = base64.b64encode(buffer).decode("utf-8")
 
-                screenshots.append({
-                    "timestamp": timestamp,
-                    "word_context": instance['word'],
-                    "image_base64": base64_image
-                })
+                screenshots.append(
+                    {
+                        "timestamp": timestamp,
+                        "word_context": instance["word"],
+                        "image_base64": base64_image,
+                    }
+                )
             else:
                 logger.error(f"Failed to read frame at timestamp {timestamp}s")
 
@@ -94,13 +107,9 @@ def create_screenshots_for_keyword(video_path: str, transcription_path: str, key
             "keyword": keyword,
             "screenshots": screenshots,
             "total_matches": len(screenshots),
-            "video_duration": duration
+            "video_duration": duration,
         }
 
     except Exception as e:
         logger.exception("Error creating screenshots")
-        return {
-            "success": False,
-            "error": str(e),
-            "screenshots": []
-        }
+        return {"success": False, "error": str(e), "screenshots": []}
