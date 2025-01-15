@@ -111,6 +111,104 @@
             color: #999;
             font-size: 0.9em;
         }
+
+        .download-button {
+            background: #2ea44f;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            margin: 20px 0;
+            font-size: 16px;
+        }
+
+        .markdown-preview {
+            margin-top: 20px;
+            padding: 20px;
+            background: #f5f5f5;
+            border-radius: 8px;
+        }
+
+        .markdown-preview pre {
+            white-space: pre-wrap;
+            word-wrap: break-word;
+            padding: 15px;
+            background: white;
+            border-radius: 4px;
+        }
+
+        .preview-tabs {
+            margin-bottom: 1rem;
+            border-bottom: 1px solid #ddd;
+        }
+        
+        .tab-button {
+            padding: 8px 16px;
+            margin-right: 8px;
+            background: none;
+            border: none;
+            border-bottom: 2px solid transparent;
+            cursor: pointer;
+        }
+        
+        .tab-button.active {
+            border-bottom: 2px solid #2ea44f;
+            color: #2ea44f;
+        }
+        
+        .preview-content {
+            padding: 1rem;
+            background: white;
+            border-radius: 4px;
+            border: 1px solid #ddd;
+        }
+        
+        .preview-content.rendered {
+            line-height: 1.6;
+        }
+        
+        .preview-content.rendered img {
+            max-width: 100%;
+            height: auto;
+            margin: 1rem 0;
+        }
+        
+        .preview-content.rendered p {
+            margin: 1rem 0;
+        }
+        
+        .preview-content.raw pre {
+            white-space: pre-wrap;
+            word-wrap: break-word;
+        }
+
+        .preview-content .blog-image {
+            margin: 2em 0;
+            text-align: center;
+        }
+
+        .preview-content .blog-image img {
+            max-width: 100%;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .preview-content .caption {
+            margin-top: 1em;
+            color: #666;
+            font-style: italic;
+        }
+
+        .preview-content .placeholder {
+            padding: 2em;
+            background: #f5f5f5;
+            border: 1px dashed #ccc;
+            text-align: center;
+            color: #666;
+            margin: 1em 0;
+            border-radius: 4px;
+        }
     </style>
 </head>
 
@@ -126,43 +224,100 @@
     </form>
 
     <div class="results">
-        {% if results and results.success %}
-            {% if results.has_screenshots %}
-                <div class="debug-info">
-                    Number of screenshots: {{ results.screenshot_count }}
+        {% if results %}
+            {% if results.success %}
+                {% if results.has_screenshots %}
+                    <div class="debug-info">
+                        Number of screenshots: {{ results.screenshot_count }}
+                    </div>
+                {% endif %}
+                
+                <button onclick="downloadMarkdown()" class="download-button">
+                    Download Markdown & Screenshots
+                </button>
+
+                <!-- Preview section -->
+                <div class="markdown-preview">
+                    <h2>Preview</h2>
+                    <div class="preview-tabs">
+                        <button onclick="showTab('rendered')" class="tab-button active">Rendered</button>
+                        <button onclick="showTab('raw')" class="tab-button">Raw Markdown</button>
+                    </div>
+                    <div id="rendered-preview" class="preview-content rendered">
+                        {{ results.markdown_html | safe }}
+                    </div>
+                    <div id="raw-preview" class="preview-content raw" style="display: none;">
+                        <pre>{{ results.markdown_content }}</pre>
+                    </div>
                 </div>
+
+                <style>
+                    .preview-tabs {
+                        margin-bottom: 1rem;
+                        border-bottom: 1px solid #ddd;
+                    }
+                    
+                    .tab-button {
+                        padding: 8px 16px;
+                        margin-right: 8px;
+                        background: none;
+                        border: none;
+                        border-bottom: 2px solid transparent;
+                        cursor: pointer;
+                    }
+                    
+                    .tab-button.active {
+                        border-bottom: 2px solid #2ea44f;
+                        color: #2ea44f;
+                    }
+                    
+                    .preview-content {
+                        padding: 1rem;
+                        background: white;
+                        border-radius: 4px;
+                        border: 1px solid #ddd;
+                    }
+                    
+                    .preview-content.rendered {
+                        line-height: 1.6;
+                    }
+                    
+                    .preview-content.rendered img {
+                        max-width: 100%;
+                        height: auto;
+                        margin: 1rem 0;
+                    }
+                    
+                    .preview-content.rendered p {
+                        margin: 1rem 0;
+                    }
+                    
+                    .preview-content.raw pre {
+                        white-space: pre-wrap;
+                        word-wrap: break-word;
+                    }
+                </style>
+
+                <script>
+                    function showTab(tabName) {
+                        // Update button states
+                        document.querySelectorAll('.tab-button').forEach(button => {
+                            button.classList.remove('active');
+                        });
+                        event.target.classList.add('active');
+                        
+                        // Show selected content
+                        document.getElementById('rendered-preview').style.display = 
+                            tabName === 'rendered' ? 'block' : 'none';
+                        document.getElementById('raw-preview').style.display = 
+                            tabName === 'raw' ? 'block' : 'none';
+                    }
+                </script>
             {% else %}
-                <div class="debug-info">
-                    No screenshots were generated
+                <div class="error-message">
+                    {{ results.error }}
                 </div>
             {% endif %}
-        <!-- Blog Content Section -->
-        <div class="blog-section">
-            <h2>Generated Blog Post</h2>
-            <div class="blog-content markdown">
-                {{ results.blog_content | safe }}
-            </div>
-        </div>
-
-        <!-- Screenshot Suggestions -->
-        <div class="screenshot-suggestions">
-            <h2>Key Moments</h2>
-            <div class="suggestions-list">
-                {{ results.screenshot_suggestions | safe }}
-            </div>
-        </div>
-
-        <!-- Screenshots Grid -->
-        <div class="screenshots-grid">
-            {% for screenshot in results.screenshots %}
-            <div class="screenshot-card">
-                <img src="data:image/jpeg;base64,{{ screenshot.image_base64 }}"
-                    alt="Screenshot at {{ screenshot.timestamp }}s">
-                <div class="timestamp">Time: {{ "%.2f"|format(screenshot.timestamp) }}s</div>
-                <div class="word-context">{{ screenshot.reason }}</div>
-            </div>
-            {% endfor %}
-        </div>
         {% endif %}
     </div>
 
@@ -199,6 +354,38 @@
                     <h2>Error</h2>
                     <p>${results.error}</p>
                 `;
+            }
+        }
+
+        async function downloadMarkdown() {
+            try {
+                const response = await fetch('/download_markdown', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        markdown_content: {{ results.markdown_content | tojson if results and results.success else '""' }},
+                        screenshots: {{ results.screenshots | tojson if results and results.success else '[]' }}
+                    })
+                });
+                
+                if (response.ok) {
+                    const blob = await response.blob();
+                    const url = window.URL.createObjectURL(blob);
+                    const a = document.createElement('a');
+                    a.href = url;
+                    a.download = 'blog_post.md';
+                    document.body.appendChild(a);
+                    a.click();
+                    window.URL.revokeObjectURL(url);
+                    a.remove();
+                } else {
+                    alert('Download failed. Please try again.');
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                alert('Download failed. Please try again.');
             }
         }
     </script>

@@ -7,7 +7,7 @@ def generate_blog_from_transcript(transcript_text: str, timestamps: list = None)
     try:
         client = OpenAI()
 
-        # Create timestamp guidance
+        # Create timestamp guidance (for placement only)
         timestamp_guidance = ""
         if timestamps:
             timestamp_str = ", ".join([f"{t:.2f}s" for t in timestamps])
@@ -19,10 +19,11 @@ def generate_blog_from_transcript(transcript_text: str, timestamps: list = None)
         <screenshot time="timestamp" description="description"/>
 
         For example:
-        <screenshot time="30.20" description="Edge detection example showing boundary detection"/>
+        <screenshot time="30.20" description="The interface showing the main dashboard"/>
 
         Only use timestamps from this list: {timestamp_guidance}
-        Keep descriptions short and focused on visual elements.
+        Focus descriptions on what is being shown, not when it appears.
+        Keep descriptions clear and concise.
 
         Your output should be valid HTML/Markdown mixed content."""
 
@@ -38,7 +39,7 @@ def generate_blog_from_transcript(transcript_text: str, timestamps: list = None)
         return {
             "success": True,
             "blog_content": response.choices[0].message.content,
-            "has_markers": "[SCREENSHOT:" in response.choices[0].message.content
+            "has_markers": "<screenshot" in response.choices[0].message.content
         }
 
     except Exception as e:
