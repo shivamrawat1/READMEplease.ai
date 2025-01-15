@@ -26,8 +26,18 @@ def save_images_from_screenshots(screenshots):
     """
     image_paths = []
     for idx, screenshot in enumerate(screenshots):
-        timestamp = screenshot.get("timestamp", "")
-        image_base64 = screenshot.get("image_base64", "")
+        # Handle strings if `screenshots` is not a list of dictionaries
+        if isinstance(screenshot, str):
+            try:
+                screenshot_data = json.loads(screenshot)
+            except json.JSONDecodeError:
+                print(f"Invalid JSON string at index {idx}")
+                continue
+        else:
+            screenshot_data = screenshot
+
+        timestamp = screenshot_data.get("timestamp", "")
+        image_base64 = screenshot_data.get("image_base64", "")
         if not image_base64:
             continue
 
@@ -38,13 +48,14 @@ def save_images_from_screenshots(screenshots):
         image_paths.append({"timestamp": timestamp, "path": image_path})
     return image_paths
 
+
 def refine_text_with_llm(text):
     """
-    Refines the input text using an LLM (e.g., OpenAI's GPT), 
+    Refines the input text using OpenAI's GPT with the updated API, 
     asking for Markdown formatting, improved clarity, and proper structure.
     """
     try:
-        response = openai.ChatCompletion.create(
+        response = openai.ChatCompletion.acreate(  # Use `acreate` for the latest API
             model="gpt-4",
             messages=[
                 {
@@ -65,12 +76,13 @@ def refine_text_with_llm(text):
                     ),
                 },
             ],
-            max_tokens=800,  # Increase token limit for larger outputs
+            max_tokens=800,  # Adjust token limit as needed
         )
-        return response['choices'][0]['message']['content']
+        return response.choices[0].message.content
     except Exception as e:
         print(f"Error using LLM: {e}")
         return text  # Fallback to the original text
+
 
 
 def format_paragraphs_with_images(transcription, images):

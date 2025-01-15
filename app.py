@@ -25,6 +25,7 @@ app = Flask(__name__,
            template_folder='apps/templates',
            static_folder='apps/static')
 app.secret_key = os.getenv('FLASK_SECRET_KEY', 'dev')
+app.config['MAX_CONTENT_LENGTH'] = 16 * 1024 * 1024  # 16 MB limit
 
 @app.route('/')
 def index():
@@ -119,18 +120,22 @@ def convert_markdown():
     """
     try:
         data = request.get_json()
+        logging.debug("Received payload: %s", json.dumps(data, indent=2))
         transcription = data.get("transcription", [])
         screenshots = data.get("screenshots", [])
-
+        
         if not transcription or not screenshots:
+            logging.error("Missing transcription or screenshots in payload.")
             return jsonify({"success": False, "error": "Missing transcription or screenshots"}), 400
 
         markdown = convert_to_markdown(transcription, screenshots)
+        logging.debug("Generated Markdown: %s", markdown)
 
         return jsonify({"success": True, "markdown": markdown}), 200
     except Exception as e:
         logging.exception("Error during Markdown conversion")
         return jsonify({"success": False, "error": str(e)}), 500
+
 
 
 if __name__ == '__main__':
