@@ -1,97 +1,59 @@
-# NosuAI - Video Keyword Screenshot Generator
 
-A Flask web application that processes videos, transcribes speech using OpenAI Whisper, and generates screenshots at moments when specific keywords are spoken.
+# NosuAI - Markdown Generator with Embedded Text and Screenshots
 
-## Features
+A Flask web application that generates Markdown documents by processing videos or GitHub repositories as input. The application transcribes speech using OpenAI Whisper, extracts screenshots at moments when specific keywords are spoken, and embeds both the text and screenshots into the Markdown document for seamless documentation.
 
-- Upload and process video files
-- Extract audio from video
-- Transcribe speech with timestamps using OpenAI Whisper API
-- Generate screenshots at exact moments when keywords are spoken
-- Word boundary-aware keyword matching (case insensitive)
-- Integration with GitHub and Notion APIs
-- Secure HTTPS local development
-- Debug logging and system status checks
+[![Python](https://img.shields.io/badge/Python-3776AB.svg?style=for-the-badge&logo=Python&logoColor=white)](https://www.python.org/)
+[![HTML](https://img.shields.io/badge/HTML-gray.svg?style=for-the-badge&logo=HTML&logoColor=white)](https://developer.mozilla.org/en-US/docs/Web/HTML)
+[![Procfile](https://img.shields.io/badge/Procfile-gray.svg?style=for-the-badge&logo=Procfile&logoColor=white)](https://devcenter.heroku.com/articles/procfile)
 
-## Requirements
+---
 
-- Python 3.11+
-- FFmpeg
-- OpenCV
-- OpenAI API key
-- (Optional) GitHub OAuth credentials
-- (Optional) Notion OAuth credentials
+## 🔗 Table of Contents
 
-## Installation
+1. [📍 Overview](#-overview)
+2. [👾 Features](#-features)
+3. [📁 Project Structure](#-project-structure)
+4. [🚀 Getting Started](#-getting-started)
+5. [📌 Roadmap](#-roadmap)
+6. [🙌 Acknowledgments](#-acknowledgments)
 
-1. Clone the repository:
+---
 
-```bash
-git clone <repository-url>
-cd nosuai
-```
+## 📍 Overview
 
-2. Create and activate a virtual environment:
+NosuAI provides an efficient solution for generating Markdown documentation. Whether you input a GitHub repository or a video file, NosuAI processes the content to create a Markdown document enriched with text and embedded screenshots. It's ideal for developers, researchers, and content creators looking to automate documentation tasks.
 
-```bash
-python -m venv venv
-source venv/bin/activate  # On Windows: venv\Scripts\activate
-```
+---
 
-3. Install dependencies:
+## 👾 Features
 
-```bash
-pip install -r requirements.txt
-```
+- **Markdown Generation**: Automatically generates Markdown documents with transcriptions and embedded screenshots.
+- **Input Options**:
+  - Process GitHub repositories to extract README data and embedded elements.
+  - Process video files to extract audio, transcribe content, and capture screenshots based on keywords.
+- **Speech Transcription**: Utilize OpenAI Whisper for accurate transcription.
+- **Screenshot Integration**: Generate and embed screenshots at moments when keywords are spoken.
+- **Secure Development**: HTTPS support for local OAuth callbacks.
+- **Debugging Tools**: Comprehensive logging for efficient troubleshooting.
 
-4. Create a `.env` file in the project root with your credentials:
+---
 
-```env
-OPENAI_API_KEY=your-openai-api-key
-FLASK_SECRET_KEY=your-secret-key
-# Optional OAuth credentials
-GITHUB_CLIENT_ID=your-github-client-id
-GITHUB_CLIENT_SECRET=your-github-client-secret
-GITHUB_REDIRECT_URI=https://127.0.0.1:5000/github/callback
-NOTION_CLIENT_ID=your-notion-client-id
-NOTION_CLIENT_SECRET=your-notion-client-secret
-NOTION_REDIRECT_URI=https://127.0.0.1:5000/notion/callback
-```
+## 📁 Project Structure
 
-## Usage
-
-1. Start the Flask application:
-
-```bash
-python app.py
-```
-
-2. Open your browser and navigate to:
-
-```
-https://127.0.0.1:5000
-```
-
-3. Upload a video and enter a keyword to search for.
-
-4. The application will:
-   - Extract the audio from your video
-   - Transcribe the speech using OpenAI Whisper
-   - Find timestamps where your keyword is spoken
-   - Generate screenshots at those moments
-   - Display the results in a grid with timestamps
-
-## Project Structure
-
-```
+```plaintext
 nosuai/
 ├── app.py                 # Main Flask application
 ├── requirements.txt       # Python dependencies
-├── .env                  # Environment variables
+├── runtime.txt            # Specifies Python version for deployment
+├── Procfile               # Process declaration for Heroku
+├── Aptfile                # Additional dependencies for deployment
+├── .env.example           # Environment variable template
 ├── apps/
 │   ├── routes/
-│   │   ├── audio_processing.py
-│   │   ├── create_screenshots.py
+│   │   ├── github_processing.py
+│   │   ├── video_processing.py
+│   │   ├── create_markdown.py
 │   │   ├── github.py
 │   │   ├── notion.py
 │   │   └── transcription_with_timestamps.py
@@ -105,27 +67,70 @@ nosuai/
 │       └── clean_samples.py
 ```
 
-## API Endpoints
+---
 
-- `/`: Main upload page
-- `/upload`: Video upload form
-- `/process_video`: Process uploaded video
-- `/test`: System component status check
-- `/github/*`: GitHub OAuth endpoints
-- `/notion/*`: Notion OAuth endpoints
+## 🚀 Getting Started
 
-## Development
+### Prerequisites
 
-The application uses HTTPS for local development to support OAuth callbacks. Accept the self-signed certificate warning in your browser for testing.
+- Python 3.11+
+- FFmpeg
+- OpenCV
+- OpenAI API Key
+- (Optional) GitHub & Notion OAuth credentials
 
-## License
+### Installation
 
-MIT License - See LICENSE file for details
+1. Clone the repository:
 
-## Contributing
+   ```bash
+   git clone https://github.com/shivamrawat1/nosuai.git
+   cd nosuai
+   ```
 
-1. Fork the repository
-2. Create a feature branch
-3. Commit your changes
-4. Push to the branch
-5. Create a Pull Request
+2. Create and activate a virtual environment:
+
+   ```bash
+   python -m venv venv
+   source venv/bin/activate  # On Windows: venv\Scripts\activate
+   ```
+
+3. Install dependencies:
+
+   ```bash
+   pip install -r requirements.txt
+   ```
+
+4. Create a `.env` file in the project root:
+
+   ```env
+   OPENAI_API_KEY=your-openai-api-key
+   FLASK_SECRET_KEY=your-secret-key
+   ```
+
+5. Start the Flask application:
+
+   ```bash
+   python app.py
+   ```
+
+6. Open your browser at [https://127.0.0.1:5000](https://127.0.0.1:5000).
+
+---
+
+## 📌 Roadmap
+
+- [x] Markdown generation from video inputs.
+- [x] Transcription and screenshot embedding.
+- [ ] Full GitHub repository processing with enhanced README generation.
+- [ ] Support for multilingual transcription.
+- [ ] Enhanced UI for easier input selection and customization.
+
+---
+
+
+## 🙌 Acknowledgments
+
+Special thanks to the OpenAI, Flask, and developer communities for their tools and resources.
+
+--- 
