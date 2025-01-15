@@ -11,6 +11,7 @@ import cv2
 from apps.routes.audio_processing import extract_audio
 from apps.routes.transcription_with_timestamps import transcribe_audio_with_timestamps
 from apps.routes.create_screenshots import create_screenshots_for_keyword
+from apps.routes.formatted_file import convert_to_markdown
 
 # Load environment variables
 load_dotenv()
@@ -109,6 +110,28 @@ def process_video():
         logger.exception("Error during video processing")
         return render_template('upload.html',
                              results={"success": False, "error": f"Processing error: {str(e)}"})
+    
+
+@app.route('/convert_markdown', methods=['POST'])
+def convert_markdown():
+    """
+    Converts transcription and screenshots into Markdown.
+    """
+    try:
+        data = request.get_json()
+        transcription = data.get("transcription", [])
+        screenshots = data.get("screenshots", [])
+
+        if not transcription or not screenshots:
+            return jsonify({"success": False, "error": "Missing transcription or screenshots"}), 400
+
+        markdown = convert_to_markdown(transcription, screenshots)
+
+        return jsonify({"success": True, "markdown": markdown}), 200
+    except Exception as e:
+        logging.exception("Error during Markdown conversion")
+        return jsonify({"success": False, "error": str(e)}), 500
+
 
 if __name__ == '__main__':
     app.run(debug=True,

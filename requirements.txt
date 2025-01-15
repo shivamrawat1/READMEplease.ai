@@ -26,3 +26,4 @@ moviepy==1.0.3
 imageio[ffmpeg]==2.31.1
 opencv-python>=4.8.0
 openai>=1.0.0
+language_tool_python>=2.6.0
