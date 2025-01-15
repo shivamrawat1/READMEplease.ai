@@ -5,18 +5,21 @@ import os
 import tempfile
 from pathlib import Path
 import cv2
+import markdown
 import base64
 from io import BytesIO
 from zipfile import ZipFile
+from typing import List
 
 # Import processing functions
 from apps.routes.audio_processing import extract_audio
 from apps.routes.transcription_with_timestamps import transcribe_audio_with_timestamps
 from apps.routes.create_screenshots import create_automated_screenshots
-from apps.utils.blog_generator import generate_blog_from_transcript
+from apps.utils.document_generator import generate_document_from_transcript
 from apps.utils.screenshot_selector import select_screenshot_moments
 from apps.utils.content_merger import generate_markdown_content
 from apps.utils.cloud_storage import CloudStorage
+from apps.utils.github_analyzer import GitHubAnalyzer
 
 # Load environment variables
 load_dotenv()
@@ -63,25 +66,64 @@ def test_route():
 def process_video():
     logger.debug("Starting video processing")
     
-    # Initial validation
-    if "video" not in request.files:
+    try:
+        # Process video and generate initial markdown
+        video_markdown = process_video_content(request)
+        if not video_markdown["success"]:
+            return render_template(
+                "upload.html",
+                results=video_markdown
+            )
+        
+        # Process GitHub repository if URL provided
+        repo_url = request.form.get("repo_url")
+        selected_sections = request.form.getlist("sections")
+        
+        if repo_url and selected_sections:
+            github_content = process_github_content(repo_url, selected_sections)
+            if not github_content["success"]:
+                return render_template(
+                    "upload.html",
+                    results={
+                        "success": False,
+                        "error": f"GitHub processing error: {github_content.get('error', 'Unknown error')}"
+                    }
+                )
+            
+            # Combine video markdown with GitHub sections
+            final_markdown = combine_markdown_sections(video_markdown, github_content)
+            return render_template("upload.html", results=final_markdown)
+        
+        # If no GitHub URL provided, return just the video markdown
+        return render_template("upload.html", results=video_markdown)
+        
+    except Exception as e:
+        logger.exception("Error during processing")
         return render_template(
-            "upload.html", 
+            "upload.html",
             results={
                 "success": False, 
-                "error": "No video file uploaded"
+                "error": f"Processing error: {str(e)}"
             }
         )
 
+def process_video_content(request) -> dict:
+    """Process video and generate markdown content."""
+    logger.debug("Starting video processing")
+    
+    # Initial validation
+    if "video" not in request.files:
+        return {
+            "success": False, 
+            "error": "No video file uploaded"
+        }
+
     video = request.files["video"]
     if not video.filename:
-        return render_template(
-            "upload.html", 
-            results={
-                "success": False, 
-                "error": "No file selected"
-            }
-        )
+        return {
+            "success": False, 
+            "error": "No file selected"
+        }
 
     # File size check
     MAX_FILE_SIZE = 25 * 1024 * 1024  # 25MB in bytes
@@ -90,13 +132,10 @@ def process_video():
     video.seek(0)
 
     if size > MAX_FILE_SIZE:
-        return render_template(
-            "upload.html",
-            results={
-                "success": False, 
-                "error": "Video file too large (max 25MB)"
-            }
-        )
+        return {
+            "success": False, 
+            "error": "Video file too large (max 25MB)"
+        }
 
     try:
         with tempfile.TemporaryDirectory() as temp_dir:
@@ -112,46 +151,38 @@ def process_video():
             transcription = transcribe_audio_with_timestamps(str(audio_path))
 
             if not transcription["success"]:
-                return render_template(
-                    "upload.html",
-                    results={
-                        "success": False,
-                        "error": f"Transcription failed: {transcription['error']}",
-                    },
-                )
+                return {
+                    "success": False,
+                    "error": f"Transcription failed: {transcription['error']}"
+                }
 
-            # Get screenshots based on content analysis first
+            # Get screenshots based on content analysis
             screenshot_suggestions = select_screenshot_moments(transcription["words"])
             screenshots = []
 
-            logger.debug("Starting content-based screenshot generation")
             if screenshot_suggestions["success"] and screenshot_suggestions.get("timestamps"):
-                logger.debug(f"Found {len(screenshot_suggestions['timestamps'])} meaningful moments")
                 screenshots = create_automated_screenshots(
                     str(video_path),
                     screenshot_suggestions["timestamps"]
                 )
 
-            # Generate blog content with actual timestamps
+            # Generate document content with actual timestamps
             full_transcript = " ".join([word["word"] for word in transcription["words"]])
-            blog_result = generate_blog_from_transcript(
+            doc_result = generate_document_from_transcript(
                 full_transcript,
                 timestamps=[s["timestamp"] for s in screenshots]
             )
 
-            if not blog_result["success"]:
-                return render_template(
-                    "upload.html",
-                    results={
-                        "success": False,
-                        "error": f"Blog generation failed: {blog_result.get('error', 'Unknown error')}",
-                    },
-                )
+            if not doc_result["success"]:
+                return {
+                    "success": False,
+                    "error": f"Document generation failed: {doc_result.get('error', 'Unknown error')}"
+                }
 
             # Generate markdown content
-            markdown_result = generate_markdown_content(blog_result["blog_content"], screenshots)
+            markdown_result = generate_markdown_content(doc_result["document_content"], screenshots)
 
-            results = {
+            return {
                 "success": True,
                 "markdown_content": markdown_result["raw"],
                 "markdown_html": markdown_result["html"],
@@ -160,17 +191,58 @@ def process_video():
                 "screenshot_count": len(screenshots)
             }
 
-            return render_template("upload.html", results=results)
-
     except Exception as e:
         logger.exception("Error during video processing")
-        return render_template(
-            "upload.html",
-            results={
-                "success": False, 
-                "error": f"Processing error: {str(e)}"
-            }
-        )
+        return {
+            "success": False,
+            "error": f"Processing error: {str(e)}"
+        }
+
+def process_github_content(repo_url: str, sections: List[str]) -> dict:
+    """Generate README sections from GitHub repository."""
+    try:
+        analyzer = GitHubAnalyzer(repo_url)
+        sections_content = []
+        
+        for section in sections:
+            result = analyzer.generate_section(section)
+            if result["success"]:
+                sections_content.append(result["content"])
+                
+        return {
+            "success": True,
+            "sections": sections_content
+        }
+    except Exception as e:
+        return {
+            "success": False,
+            "error": str(e)
+        }
+
+def combine_markdown_sections(video_content: dict, github_content: dict) -> dict:
+    """Combine video markdown with GitHub sections."""
+    try:
+        if not video_content.get("success", False) or not github_content.get("success", False):
+            return video_content if video_content.get("success", False) else github_content
+        
+        combined_markdown = video_content["markdown_content"] + "\n\n"
+        for section in github_content.get("sections", []):
+            combined_markdown += section + "\n\n"
+        
+        return {
+            "success": True,
+            "markdown_content": combined_markdown,
+            "markdown_html": markdown.markdown(combined_markdown, extensions=['extra']),
+            "screenshots": video_content.get("screenshots", []),
+            "has_screenshots": video_content.get("has_screenshots", False),
+            "screenshot_count": video_content.get("screenshot_count", 0)
+        }
+    except Exception as e:
+        logger.exception("Error combining markdown sections")
+        return {
+            "success": False,
+            "error": f"Error combining sections: {str(e)}"
+        }
 
 
 @app.route("/download_markdown", methods=["POST"])

@@ -2,8 +2,8 @@ from openai import OpenAI
 import os
 
 
-def generate_blog_from_transcript(transcript_text: str, timestamps: list = None) -> dict:
-    """Generate a blog post with screenshot markers using actual timestamps."""
+def generate_document_from_transcript(transcript_text: str, timestamps: list = None) -> dict:
+    """Generate an explanatory document with screenshot markers using actual timestamps."""
     try:
         client = OpenAI()
 
@@ -24,6 +24,7 @@ def generate_blog_from_transcript(transcript_text: str, timestamps: list = None)
         Only use timestamps from this list: {timestamp_guidance}
         Focus descriptions on what is being shown, not when it appears.
         Keep descriptions clear and concise.
+        Write in a clear, instructional style suitable for technical documentation.
 
         Your output should be valid HTML/Markdown mixed content."""
 
@@ -31,14 +32,14 @@ def generate_blog_from_transcript(transcript_text: str, timestamps: list = None)
             model="gpt-4",
             messages=[
                 {"role": "system", "content": system_prompt},
-                {"role": "user", "content": f"Create a technical blog post from this transcript with screenshot markers at the provided timestamps:\n\n{transcript_text}"}
+                {"role": "user", "content": f"Create a technical explanation document from this transcript with screenshot markers at the provided timestamps:\n\n{transcript_text}"}
             ],
             temperature=0.7,
         )
 
         return {
             "success": True,
-            "blog_content": response.choices[0].message.content,
+            "document_content": response.choices[0].message.content,
             "has_markers": "<screenshot" in response.choices[0].message.content
         }
 

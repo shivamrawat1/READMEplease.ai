@@ -19,19 +19,19 @@ class HTMLPreservationPreprocessor(Preprocessor):
                 new_lines.append(line)
         return new_lines
 
-def generate_markdown_content(blog_content: str, screenshots: List[Dict]) -> dict:
+def generate_markdown_content(document_content: str, screenshots: List[Dict]) -> dict:
     """Generate markdown content with cloud-hosted image references."""
     try:
-        if not blog_content:
+        if not document_content:
             return {
-                "raw": "Error: No blog content provided",
-                "html": "<p>Error: No blog content provided</p>"
+                "raw": "Error: No document content provided",
+                "html": "<p>Error: No document content provided</p>"
             }
             
         if not screenshots:
             return {
-                "raw": blog_content,
-                "html": markdown.markdown(blog_content)
+                "raw": document_content,
+                "html": markdown.markdown(document_content)
             }
 
         # Initialize cloud storage
@@ -42,11 +42,11 @@ def generate_markdown_content(blog_content: str, screenshots: List[Dict]) -> dic
         
         # Extract screenshot markers and their descriptions
         marker_pattern = r'<screenshot\s+time="([\d.]+)"\s+description="([^"]+)"\s*/>'
-        markers = list(re.finditer(marker_pattern, blog_content))
+        markers = list(re.finditer(marker_pattern, document_content))
 
         # Create two versions: one for markdown file and one for HTML preview
-        markdown_content = blog_content
-        html_content = blog_content
+        markdown_content = document_content
+        html_content = document_content
 
         for marker in markers:
             timestamp = float(marker.group(1))
