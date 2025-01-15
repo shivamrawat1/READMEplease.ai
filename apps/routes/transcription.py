@@ -1,6 +1,4 @@
 from openai import OpenAI
-import json
-from pathlib import Path
 
 def transcribe_audio(audio_file_path: str) -> dict:
     """

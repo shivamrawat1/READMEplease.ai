@@ -1,4 +1,4 @@
-from flask import Flask, render_template, request, redirect, url_for, session, jsonify, jsonify
+from flask import Flask, render_template, request, redirect, url_for, session, jsonify
 import logging
 from dotenv import load_dotenv
 import os
@@ -12,6 +12,9 @@ from apps.routes.audio_processing import extract_audio
 from apps.routes.transcription_with_timestamps import transcribe_audio_with_timestamps
 from apps.routes.create_screenshots import create_screenshots_for_keyword
 from apps.routes.formatted_file import convert_to_markdown
+from apps.routes.github import *
+from apps.routes.notion import *
+from apps.routes.other import *
 
 # Load environment variables
 load_dotenv()
