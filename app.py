@@ -11,6 +11,7 @@ import cv2
 from apps.routes.audio_processing import extract_audio
 from apps.routes.transcription_with_timestamps import transcribe_audio_with_timestamps
 from apps.routes.create_screenshots import create_screenshots_for_keyword
+from apps.routes.formatted_file import convert_to_markdown
 
 # Load environment variables
 load_dotenv()
@@ -24,6 +25,7 @@ app = Flask(__name__,
            template_folder='apps/templates',
            static_folder='apps/static')
 app.secret_key = os.getenv('FLASK_SECRET_KEY', 'dev')
+app.config['MAX_CONTENT_LENGTH'] = 16 * 1024 * 1024  # 16 MB limit
 
 # Global variable to store processing results
 processing_results = {}
@@ -114,6 +116,32 @@ def process_video():
         logger.exception("Error during video processing")
         return render_template('upload.html',
                              results={"success": False, "error": f"Processing error: {str(e)}"})
+    
+
+@app.route('/convert_markdown', methods=['POST'])
+def convert_markdown():
+    """
+    Converts transcription and screenshots into Markdown.
+    """
+    try:
+        data = request.get_json()
+        logging.debug("Received payload: %s", json.dumps(data, indent=2))
+        transcription = data.get("transcription", [])
+        screenshots = data.get("screenshots", [])
+        
+        if not transcription or not screenshots:
+            logging.error("Missing transcription or screenshots in payload.")
+            return jsonify({"success": False, "error": "Missing transcription or screenshots"}), 400
+
+        markdown = convert_to_markdown(transcription, screenshots)
+        logging.debug("Generated Markdown: %s", markdown)
+
+        return jsonify({"success": True, "markdown": markdown}), 200
+    except Exception as e:
+        logging.exception("Error during Markdown conversion")
+        return jsonify({"success": False, "error": str(e)}), 500
+
+
 
 if __name__ == '__main__':
     app.run(debug=True,
