@@ -14,15 +14,17 @@ def generate_blog_from_transcript(transcript_text: str, timestamps: list = None)
             timestamp_guidance = f"\nUse these exact timestamps for screenshots: {timestamp_str}"
 
         system_prompt = f"""You are an expert technical writer. When writing about technical
-        concepts or visual elements, mark where screenshots would be helpful using this format:
-        [SCREENSHOT:timestamp:description]
+        concepts or visual elements, mark where screenshots should be embedded using this format:
 
-        Only use these exact timestamps for screenshots: {timestamp_guidance}
+        <screenshot time="timestamp" description="description"/>
 
-        Examples:
-        [SCREENSHOT:30.20:Example of the edge detection output]
+        For example:
+        <screenshot time="30.20" description="Edge detection example showing boundary detection"/>
 
-        Keep descriptions short and focused on visual elements."""
+        Only use timestamps from this list: {timestamp_guidance}
+        Keep descriptions short and focused on visual elements.
+
+        Your output should be valid HTML/Markdown mixed content."""
 
         response = client.chat.completions.create(
             model="gpt-4",

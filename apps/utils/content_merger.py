@@ -5,8 +5,8 @@ from typing import List, Dict
 def generate_blog_html(blog_content: str, screenshots: List[Dict]) -> str:
     """Generate HTML blog with screenshots."""
     try:
-        # Extract screenshot markers and their descriptions
-        marker_pattern = r'\[SCREENSHOT:(\d+\.?\d*):([^\]]+)\]'
+        # Extract screenshot markers and their descriptions using HTML tag pattern
+        marker_pattern = r'<screenshot\s+time="([\d.]+)"\s+description="([^"]+)"\s*/>'
         markers = list(re.finditer(marker_pattern, blog_content))
 
         # Create a mapping of available screenshots
