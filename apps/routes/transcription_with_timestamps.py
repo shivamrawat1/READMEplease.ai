@@ -1,7 +1,4 @@
-import openai
 from openai import OpenAI
-import json
-from pathlib import Path
 import os
 
 def transcribe_audio_with_timestamps(audio_file_path: str) -> dict:

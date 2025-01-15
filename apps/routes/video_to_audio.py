@@ -1,6 +1,6 @@
 import os
 import uuid
-from flask import Blueprint, request, jsonify, send_file
+from flask import Blueprint, request, jsonify
 from moviepy.editor import VideoFileClip
 from ..utils.clean_samples import transcribe_audio
 
