@@ -1,10 +1,11 @@
-from flask import Flask, render_template, request, redirect, url_for, session, jsonify
+from flask import Flask, render_template, request, redirect, url_for, session, jsonify, jsonify
+import logging
 from dotenv import load_dotenv
 import os
 import tempfile
 from pathlib import Path
 import json
-import threading
+import cv2
 
 # Import processing functions
 from apps.routes.audio_processing import extract_audio
@@ -13,6 +14,10 @@ from apps.routes.create_screenshots import create_screenshots_for_keyword
 
 # Load environment variables
 load_dotenv()
+
+# Configure logging
+logging.basicConfig(level=logging.DEBUG)
+logger = logging.getLogger(__name__)
 
 # Create Flask app with custom template folder
 app = Flask(__name__,
@@ -33,99 +38,82 @@ def upload():
     session.pop('processing_id', None)
     return render_template('upload.html')
 
-def process_video_task(video_path, keyword, processing_id):
-    try:
-        temp_dir = tempfile.mkdtemp()
-        temp_dir_path = Path(temp_dir)
-        
-        # Extract audio
-        audio_path = temp_dir_path / "audio.wav"
-        extract_audio(str(video_path), str(audio_path))
-        
-        # Get transcription with timestamps
-        transcription = transcribe_audio_with_timestamps(str(audio_path))
-        
-        if not transcription['success']:
-            processing_results[processing_id] = {
-                "success": False,
-                "error": f"Transcription failed: {transcription['error']}"
-            }
-            return
-        
-        # Save transcription to file
-        transcription_path = temp_dir_path / "transcription.json"
-        with open(transcription_path, 'w') as f:
-            json.dump(transcription['words'], f)
-        
-        # Create screenshots
-        screenshots = create_screenshots_for_keyword(
-            str(video_path),
-            str(transcription_path),
-            keyword
-        )
-        
-        processing_results[processing_id] = screenshots
-        
-    except Exception as e:
-        processing_results[processing_id] = {
-            "success": False,
-            "error": str(e)
-        }
-    finally:
-        # Cleanup temporary directory
-        import shutil
-        shutil.rmtree(temp_dir, ignore_errors=True)
+@app.route('/test', methods=['GET'])
+def test_route():
+    """Test route to verify system components."""
+    tests = {
+        "flask": True,
+        "openai_key": bool(os.getenv('OPENAI_API_KEY')),
+        "ffmpeg": bool(os.system('ffmpeg -version') == 0),
+        "opencv": bool(cv2.__version__),
+        "temp_dir": os.access(tempfile.gettempdir(), os.W_OK)
+    }
+    return jsonify(tests)
 
 @app.route('/process_video', methods=['POST'])
 def process_video():
+    logger.debug("Starting video processing")
     if 'video' not in request.files:
-        return render_template('upload.html', 
+        logger.error("No video file uploaded")
+        return render_template('upload.html',
                              results={"success": False, "error": "No video file uploaded"})
-    
+
     video = request.files['video']
     keyword = request.form.get('keyword', '').strip()
-    
+    logger.info(f"Processing video for keyword: {keyword}")
+
     if not keyword:
-        return render_template('upload.html', 
+        logger.error("No keyword provided")
+        return render_template('upload.html',
                              results={"success": False, "error": "No keyword provided"})
-    
-    # Create temporary file for video
-    temp_video = tempfile.NamedTemporaryFile(delete=False, suffix='.mp4')
-    video.save(temp_video.name)
-    
-    # Generate unique processing ID
-    processing_id = str(hash(f"{temp_video.name}{keyword}{os.urandom(8).hex()}"))
-    session['processing_id'] = processing_id
-    
-    # Start processing in background
-    thread = threading.Thread(
-        target=process_video_task,
-        args=(temp_video.name, keyword, processing_id)
-    )
-    thread.start()
-    
-    # Redirect to wait screen
-    return redirect(url_for('wait_screen'))
 
-@app.route('/check_progress')
-def check_progress():
-    processing_id = session.get('processing_id')
-    if not processing_id:
-        return jsonify({"status": "error", "message": "No processing ID found"})
-    
-    if processing_id in processing_results:
-        result = processing_results[processing_id]
-        # Clean up results after retrieving them
-        del processing_results[processing_id]
-        return jsonify({"status": "complete", "results": result})
-    
-    return jsonify({"status": "processing"})
+    try:
+        # Create temporary directory for processing
+        with tempfile.TemporaryDirectory() as temp_dir:
+            temp_dir_path = Path(temp_dir)
+            logger.debug(f"Created temp directory: {temp_dir_path}")
 
-@app.route("/wait")
-def wait_screen():
-    """Display wait screen with video."""
-    is_https = request.is_secure
-    return render_template('wait.html', is_https=is_https)
+            # Save uploaded video
+            video_path = temp_dir_path / "uploaded_video.mp4"
+            video.save(video_path)
+            logger.debug(f"Saved video to: {video_path}")
+
+            # Extract audio
+            audio_path = temp_dir_path / "audio.wav"
+            logger.debug("Extracting audio...")
+            extract_audio(str(video_path), str(audio_path))
+
+            # Get transcription with timestamps
+            logger.debug("Starting transcription...")
+            transcription = transcribe_audio_with_timestamps(str(audio_path))
+
+            if not transcription['success']:
+                logger.error(f"Transcription failed: {transcription['error']}")
+                return render_template('upload.html',
+                                    results={"success": False,
+                                           "error": f"Transcription failed: {transcription['error']}"})
+
+            # Save transcription to file
+            transcription_path = temp_dir_path / "transcription.json"
+            with open(transcription_path, 'w') as f:
+                json.dump(transcription['words'], f)
+            logger.debug("Saved transcription to file")
+
+            # Create screenshots
+            logger.debug("Creating screenshots...")
+            screenshots = create_screenshots_for_keyword(
+                str(video_path),
+                str(transcription_path),
+                keyword
+            )
+
+            logger.info(f"Processing complete. Found {len(screenshots.get('screenshots', []))} screenshots")
+            return render_template('upload.html', results=screenshots)
+
+    except Exception as e:
+        logger.exception("Error during video processing")
+        return render_template('upload.html',
+                             results={"success": False, "error": f"Processing error: {str(e)}"})
 
 if __name__ == '__main__':
     app.run(debug=True,
