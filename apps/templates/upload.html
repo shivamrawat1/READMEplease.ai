@@ -220,20 +220,15 @@
             <label for="video">Select Video File:</label><br>
             <input type="file" id="video" name="video" accept="video/*" required>
         </div>
-        <button type="submit">Generate Blog & Screenshots</button>
+        <button type="submit">Generate README.md</button>
     </form>
 
     <div class="results">
         {% if results %}
             {% if results.success %}
-                {% if results.has_screenshots %}
-                    <div class="debug-info">
-                        Number of screenshots: {{ results.screenshot_count }}
-                    </div>
-                {% endif %}
                 
                 <button onclick="downloadMarkdown()" class="download-button">
-                    Download Markdown & Screenshots
+                    Download README.md
                 </button>
 
                 <!-- Preview section -->
