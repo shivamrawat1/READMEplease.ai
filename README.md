@@ -108,6 +108,7 @@ nosuai/
    ```env
    OPENAI_API_KEY=your-openai-api-key
    FLASK_SECRET_KEY=your-secret-key
+   GITHUB_TOKEN=your-github-hub-token (OPTIONAL to demove rate limits)
    ```
 
 5. Start the Flask application:
