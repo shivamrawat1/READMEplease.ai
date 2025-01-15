@@ -1,27 +1,27 @@
 # Core Flask and extensions
-Flask==3.1.0
-Werkzeug==3.1.3
-gunicorn==23.0.0
-python-dotenv==1.0.1
+Flask
+Werkzeug
+gunicorn
+python-dotenv
 
 # OAuth and API clients
-requests==2.32.3
-notion-client==2.3.0
-httpx==0.28.1
+requests
+notion-client
+httpx
 
 # Video/Image processing
-opencv-python-headless==4.8.1.78
-moviepy==1.0.3
-imageio==2.31.6
-imageio-ffmpeg==0.4.9
+numpy
+opencv-python-headless
+moviepy
+imageio
+imageio-ffmpeg
 
 # OpenAI
-openai==1.6.1
+openai
 
 # Security
-pyOpenSSL==24.3.0
-cryptography==44.0.0
+pyOpenSSL
+cryptography
 
 # Basic utilities
-numpy==2.0.2
-urllib3==2.3.0
+urllib3
