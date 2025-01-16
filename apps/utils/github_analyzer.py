@@ -6,6 +6,9 @@ import requests
 import base64
 import re
 import json
+import asyncio
+import aiohttp
+from functools import lru_cache
 
 class GitHubAnalyzer:
     def __init__(self, repo_url: str):
@@ -41,8 +44,9 @@ class GitHubAnalyzer:
         else:
             raise ValueError("Invalid GitHub URL")
 
+    @lru_cache(maxsize=128)
     def _fetch_repo_data(self):
-        """Fetch repository metadata."""
+        """Fetch repository metadata with caching."""
         try:
             response = requests.get(self.repo_api_url, headers=self.headers)
             if response.status_code == 200:
@@ -64,15 +68,30 @@ class GitHubAnalyzer:
         except requests.exceptions.RequestException as e:
             raise Exception(f"Network error: {str(e)}")
 
+    async def _fetch_url(self, session, url):
+        """Fetch a URL asynchronously."""
+        async with session.get(url, headers=self.headers) as response:
+            return await response.json()
+
+    async def _fetch_root_files_async(self):
+        """Fetch root directory files asynchronously."""
+        async with aiohttp.ClientSession() as session:
+            response = await self._fetch_url(session, f"{self.repo_api_url}/contents")
+            return [f for f in response if f["type"] == "file"]
+
     def _fetch_root_files(self):
-        """Fetch only root directory files."""
-        try:
-            response = requests.get(f"{self.repo_api_url}/contents", headers=self.headers)
-            if response.status_code == 200:
-                return [f for f in response.json() if f["type"] == "file"]
-            return []
-        except:
-            return []
+        """Fetch root directory files."""
+        return asyncio.run(self._fetch_root_files_async())
+
+    async def _fetch_languages_async(self):
+        """Fetch repository languages asynchronously."""
+        async with aiohttp.ClientSession() as session:
+            response = await self._fetch_url(session, f"{self.repo_api_url}/languages")
+            return list(response.keys())
+
+    def _get_languages(self) -> List[str]:
+        """Get repository languages."""
+        return asyncio.run(self._fetch_languages_async())
 
     def generate_section(self, section_name: str) -> dict:
         """Generate a specific README section based on repository analysis."""
@@ -309,16 +328,6 @@ class GitHubAnalyzer:
         except Exception as e:
             return base_prompts.get(section_name)
 
-    def _get_languages(self) -> List[str]:
-        """Get repository languages."""
-        try:
-            response = requests.get(f"{self.repo_api_url}/languages", headers=self.headers)
-            if response.status_code == 200:
-                return list(response.json().keys())
-        except:
-            pass
-        return []
-
     def _get_dependencies(self) -> List[str]:
         """Get project dependencies from root-level dependency files only."""
         dependencies = []
@@ -353,41 +362,226 @@ class GitHubAnalyzer:
                 return []
         return []
 
-    def _get_directory_structure(self) -> Dict:
-        """Get simplified directory structure (max 2 levels deep)."""
-        def create_tree(files, depth=0):
-            if depth >= 2:  # Limit depth to 2 levels
-                return "..."
+    def _fetch_repo_files(self):
+        """Fetch all relevant repository files recursively."""
+        try:
+            def should_analyze_file(file_name: str) -> bool:
+                """Determine if a file should be analyzed based on its name."""
+                # Files to exclude
+                exclude_patterns = [
+                    r'\.git',
+                    r'\.env',
+                    r'__pycache__',
+                    r'\.pyc$',
+                    r'\.pyo$',
+                    r'\.pyd$',
+                    r'\.so$',
+                    r'\.dll$',
+                    r'\.dylib$',
+                    r'\.log$',
+                    r'\.pot$',
+                    r'\.po$',
+                    r'\.mo$',
+                    r'\.coverage$',
+                    r'\.pytest_cache',
+                    r'\.DS_Store',
+                    r'node_modules',
+                    r'\.vscode',
+                    r'\.idea',
+                    r'\.vs',
+                    r'dist',
+                    r'build',
+                    r'\.cache',
+                    r'\.sass-cache',
+                    r'\.next',
+                    r'\.nuxt',
+                    r'\.serverless',
+                    r'\.webpack',
+                    r'coverage',
+                    r'\.nyc_output',
+                    r'\.lock$',
+                    r'package-lock\.json$',
+                    r'yarn\.lock$',
+                ]
+                
+                return not any(re.search(pattern, file_name) for pattern in exclude_patterns)
+
+            def fetch_directory_contents(path=""):
+                """Recursively fetch directory contents."""
+                files = []
+                try:
+                    response = requests.get(f"{self.repo_api_url}/contents/{path}", headers=self.headers)
+                    if response.status_code == 200:
+                        contents = response.json()
+                        if isinstance(contents, list):
+                            for item in contents:
+                                if should_analyze_file(item["name"]):
+                                    if item["type"] == "file":
+                                        files.append(item)
+                                    elif item["type"] == "dir":
+                                        files.extend(fetch_directory_contents(f"{path}/{item['name']}" if path else item["name"]))
+                except Exception as e:
+                    print(f"Error fetching directory contents for {path}: {str(e)}")
+                return files
+
+            return fetch_directory_contents()
+        except Exception as e:
+            print(f"Error in _fetch_repo_files: {str(e)}")
+            return []
+
+    def _analyze_file_content(self, file_content: str, file_name: str) -> dict:
+        """Analyze file content to extract meaningful information."""
+        try:
+            info = {
+                "type": None,
+                "description": "",
+                "key_elements": [],
+                "dependencies": [],
+                "functions": [],
+                "classes": [],
+                "configs": {}
+            }
+
+            # Determine file type and extract relevant information
+            if file_name.endswith(('.py', '.js', '.ts', '.java', '.go', '.rb')):
+                info["type"] = "source"
+                # Extract functions, classes, and imports
+                if file_name.endswith('.py'):
+                    info.update(self._analyze_python_file(file_content))
+                elif file_name.endswith(('.js', '.ts')):
+                    info.update(self._analyze_javascript_file(file_content))
+                # Add more language analyzers as needed
+                
+            elif file_name.endswith(('Dockerfile', 'docker-compose.yml', 'docker-compose.yaml')):
+                info["type"] = "docker"
+                info.update(self._analyze_docker_file(file_content))
+                
+            elif file_name.endswith(('.yml', '.yaml', '.json', '.toml', '.ini')):
+                info["type"] = "config"
+                info.update(self._analyze_config_file(file_content))
+                
+            elif file_name.endswith(('.md', '.rst', '.txt')):
+                info["type"] = "documentation"
+                info["description"] = "Documentation file containing project information"
+                
+            return info
+        except Exception as e:
+            print(f"Error analyzing file {file_name}: {str(e)}")
+            return {}
+
+    def _analyze_python_file(self, content: str) -> dict:
+        """Analyze Python file content."""
+        import ast
+        try:
+            tree = ast.parse(content)
+            functions = []
+            classes = []
+            imports = []
             
-            tree = {}
-            for file in files:
-                if file["type"] == "dir" and depth < 2:
-                    contents = self._get_directory_contents(file["url"])
-                    if contents:
-                        tree[file["name"]] = create_tree(contents, depth + 1)
-                else:
-                    tree[file["name"]] = None
-            return tree
+            for node in ast.walk(tree):
+                if isinstance(node, ast.FunctionDef):
+                    functions.append({
+                        "name": node.name,
+                        "args": [arg.arg for arg in node.args.args],
+                        "docstring": ast.get_docstring(node) or ""
+                    })
+                elif isinstance(node, ast.ClassDef):
+                    classes.append({
+                        "name": node.name,
+                        "methods": [m.name for m in node.body if isinstance(m, ast.FunctionDef)],
+                        "docstring": ast.get_docstring(node) or ""
+                    })
+                elif isinstance(node, (ast.Import, ast.ImportFrom)):
+                    if isinstance(node, ast.Import):
+                        imports.extend(n.name for n in node.names)
+                    else:
+                        imports.extend(f"{node.module}.{n.name}" for n in node.names)
+            
+            return {
+                "functions": functions,
+                "classes": classes,
+                "dependencies": imports
+            }
+        except Exception:
+            return {"functions": [], "classes": [], "dependencies": []}
 
-        try:
-            response = requests.get(f"{self.repo_api_url}/contents", headers=self.headers)
-            if response.status_code == 200:
-                return create_tree(response.json())
-            return {}
-        except:
-            return {}
+    def _analyze_javascript_file(self, content: str) -> dict:
+        """Basic JavaScript/TypeScript file analysis."""
+        import re
+        
+        # Simple regex patterns for demonstration
+        function_pattern = r'(?:function\s+(\w+)|const\s+(\w+)\s*=\s*(?:async\s*)?\()'
+        class_pattern = r'class\s+(\w+)'
+        import_pattern = r'(?:import\s+{\s*([^}]+)\s*}|import\s+(\w+))\s+from\s+[\'"]([^\'"]+)[\'"]'
+        
+        functions = re.findall(function_pattern, content)
+        classes = re.findall(class_pattern, content)
+        imports = re.findall(import_pattern, content)
+        
+        return {
+            "functions": [f[0] or f[1] for f in functions],
+            "classes": classes,
+            "dependencies": [i[2] for i in imports]
+        }
 
-    def _get_directory_contents(self, url: str) -> Dict:
-        """Get contents of a directory."""
+    def _analyze_docker_file(self, content: str) -> dict:
+        """Analyze Dockerfile content."""
+        import re
+        
+        base_image = re.search(r'FROM\s+([^\s]+)', content)
+        expose_ports = re.findall(r'EXPOSE\s+(\d+)', content)
+        env_vars = re.findall(r'ENV\s+(\w+)(?:\s+|=)', content)
+        
+        return {
+            "base_image": base_image.group(1) if base_image else None,
+            "exposed_ports": expose_ports,
+            "environment_variables": env_vars,
+            "configs": {
+                "base_image": base_image.group(1) if base_image else None,
+                "ports": expose_ports,
+                "env_vars": env_vars
+            }
+        }
+
+    def _analyze_config_file(self, content: str) -> dict:
+        """Analyze configuration file content."""
         try:
-            response = requests.get(url, headers=self.headers)
-            if response.status_code == 200:
-                files = response.json()
-                return {f["name"]: None if f["type"] == "file" else self._get_directory_contents(f["url"]) 
-                       for f in files}
-        except:
-            pass
-        return {}
+            if content.startswith('{'):
+                # JSON file
+                import json
+                data = json.loads(content)
+            else:
+                # YAML file
+                import yaml
+                data = yaml.safe_load(content)
+            
+            return {
+                "configs": data
+            }
+        except Exception:
+            return {"configs": {}}
+
+    def _get_directory_structure(self) -> Dict:
+        """Get enhanced directory structure with file analysis."""
+        files = self._fetch_repo_files()
+        structure = {}
+        
+        for file in files:
+            path_parts = file["path"].split('/')
+            current_dict = structure
+            
+            # Build directory structure
+            for part in path_parts[:-1]:
+                if part not in current_dict:
+                    current_dict[part] = {}
+                current_dict = current_dict[part]
+            
+            # Add file with analysis
+            content = self._get_file_content(file["download_url"])
+            if content:
+                current_dict[path_parts[-1]] = self._analyze_file_content(content, file["name"])
+        
+        return structure
 
     def _find_routes(self) -> List[Dict]:
         """Find API routes in the codebase."""
