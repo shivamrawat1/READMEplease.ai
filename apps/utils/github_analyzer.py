@@ -9,12 +9,24 @@ import json
 import asyncio
 import aiohttp
 from functools import lru_cache
+from dotenv import load_dotenv
 
 class GitHubAnalyzer:
     def __init__(self, repo_url: str):
+        # Force reload environment variables
+        load_dotenv(override=True, verbose=True)
+        
         self.repo_url = repo_url
         self.repo_api_url = self._get_api_url()
-        self.client = OpenAI()
+        
+        # Get API key from environment and print for debugging
+        openai_api_key = os.getenv('OPENAI_API_KEY')
+        if not openai_api_key:
+            raise ValueError("OPENAI_API_KEY not found")
+        print(f"GitHubAnalyzer loaded API Key: {openai_api_key[:10]}...")
+        
+        # Initialize with explicit API key
+        self.client = OpenAI(api_key=openai_api_key)
         
         # Base headers required for GitHub API
         self.headers = {
@@ -119,7 +131,7 @@ class GitHubAnalyzer:
             prompt = self._get_section_prompt(section_name, repo_info)
             
             response = self.client.chat.completions.create(
-                model="gpt-4",
+                model="gpt-4o",
                 messages=[
                     {"role": "system", "content": "You are a technical documentation expert. Generate detailed, accurate, and specific documentation based on the repository data provided. Focus on practical examples and clear explanations."},
                     {"role": "user", "content": prompt},
