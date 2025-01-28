@@ -57,38 +57,50 @@ def test_route():
 def process_video():
     logger.debug("Starting video processing")
     if "video" not in request.files:
+        logger.error("No video file uploaded")
         return render_template(
             "upload.html", results={"success": False, "error": "No video file uploaded"}
         )
 
     video = request.files["video"]
+    if not video.filename:
+        logger.error("No selected file")
+        return render_template(
+            "upload.html", results={"success": False, "error": "No selected file"}
+        )
 
-    # Check file size (25MB limit for Whisper API)
-    MAX_FILE_SIZE = 25 * 1024 * 1024  # 25MB in bytes
+    # Check file size (100MB limit)
+    MAX_FILE_SIZE = 100 * 1024 * 1024  # 100MB in bytes
     video.seek(0, os.SEEK_END)
     size = video.tell()
     video.seek(0)
 
+    logger.debug(f"Uploaded file size: {size/1024/1024:.2f}MB")
+
     if size > MAX_FILE_SIZE:
         return render_template(
             "upload.html",
-            results={"success": False, "error": "Video file too large (max 25MB)"},
+            results={"success": False, "error": f"Video file too large (max 100MB)"},
         )
 
     try:
         with tempfile.TemporaryDirectory() as temp_dir:
+            logger.debug(f"Created temp directory: {temp_dir}")
             temp_dir_path = Path(temp_dir)
             video_path = temp_dir_path / "uploaded_video.mp4"
             video.save(video_path)
 
             # Extract audio with compression for large files
+            logger.debug("Extracting audio...")
             audio_path = temp_dir_path / "audio.wav"
             extract_audio(str(video_path), str(audio_path), max_size_mb=25)
 
             # Get transcription with timestamps
+            logger.debug("Transcribing audio...")
             transcription = transcribe_audio_with_timestamps(str(audio_path))
 
             if not transcription["success"]:
+                logger.error(f"Transcription failed: {transcription['error']}")
                 return render_template(
                     "upload.html",
                     results={
@@ -135,6 +147,7 @@ def process_video():
                 "screenshot_count": len(screenshots)  # Add this for debugging
             }
 
+            logger.debug("Processing complete")
             return render_template("upload.html", results=results)
 
     except Exception as e:

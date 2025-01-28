@@ -1,4 +1,22 @@
+# Virtual environments
 venv/
+venv_new/
+/venv_new/
+
+# Environment variables
 .env
+
+# Python cache files
 __pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# System files
 .DS_Store
+**/.DS_Store
+
+# IDE files
+.vscode/
+.idea/
+*.swp

@@ -126,43 +126,53 @@
     </form>
 
     <div class="results">
-        {% if results and results.success %}
-            {% if results.has_screenshots %}
-                <div class="debug-info">
-                    Number of screenshots: {{ results.screenshot_count }}
+        {% if results %}
+            <div class="debug-info">
+                <h3>Debug Info:</h3>
+                <pre>{{ results | tojson(indent=2) }}</pre>
+            </div>
+            {% if results.success %}
+                {% if results.has_screenshots %}
+                    <div class="debug-info">
+                        Number of screenshots: {{ results.screenshot_count }}
+                    </div>
+                {% else %}
+                    <div class="debug-info">
+                        No screenshots were generated
+                    </div>
+                {% endif %}
+            <!-- Blog Content Section -->
+            <div class="blog-section">
+                <h2>Generated Blog Post</h2>
+                <div class="blog-content markdown">
+                    {{ results.blog_content | safe }}
                 </div>
+            </div>
+
+            <!-- Screenshot Suggestions -->
+            <div class="screenshot-suggestions">
+                <h2>Key Moments</h2>
+                <div class="suggestions-list">
+                    {{ results.screenshot_suggestions | safe }}
+                </div>
+            </div>
+
+            <!-- Screenshots Grid -->
+            <div class="screenshots-grid">
+                {% for screenshot in results.screenshots %}
+                <div class="screenshot-card">
+                    <img src="data:image/jpeg;base64,{{ screenshot.image_base64 }}"
+                        alt="Screenshot at {{ screenshot.timestamp }}s">
+                    <div class="timestamp">Time: {{ "%.2f"|format(screenshot.timestamp) }}s</div>
+                    <div class="word-context">{{ screenshot.reason }}</div>
+                </div>
+                {% endfor %}
+            </div>
             {% else %}
-                <div class="debug-info">
-                    No screenshots were generated
+                <div class="error">
+                    Error: {{ results.error }}
                 </div>
             {% endif %}
-        <!-- Blog Content Section -->
-        <div class="blog-section">
-            <h2>Generated Blog Post</h2>
-            <div class="blog-content markdown">
-                {{ results.blog_content | safe }}
-            </div>
-        </div>
-
-        <!-- Screenshot Suggestions -->
-        <div class="screenshot-suggestions">
-            <h2>Key Moments</h2>
-            <div class="suggestions-list">
-                {{ results.screenshot_suggestions | safe }}
-            </div>
-        </div>
-
-        <!-- Screenshots Grid -->
-        <div class="screenshots-grid">
-            {% for screenshot in results.screenshots %}
-            <div class="screenshot-card">
-                <img src="data:image/jpeg;base64,{{ screenshot.image_base64 }}"
-                    alt="Screenshot at {{ screenshot.timestamp }}s">
-                <div class="timestamp">Time: {{ "%.2f"|format(screenshot.timestamp) }}s</div>
-                <div class="word-context">{{ screenshot.reason }}</div>
-            </div>
-            {% endfor %}
-        </div>
         {% endif %}
     </div>
 

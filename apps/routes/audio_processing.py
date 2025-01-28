@@ -8,7 +8,7 @@ def extract_audio(video_path, output_audio_path="audio.wav", max_size_mb=25):
     Extract and compress audio from video to stay within API limits.
     """
     try:
-        # Direct extraction with compression settings
+        # First pass - extract with high quality
         subprocess.run(
             [
                 "ffmpeg",
@@ -28,8 +28,11 @@ def extract_audio(video_path, output_audio_path="audio.wav", max_size_mb=25):
             capture_output=True,
         )
 
-        # Check if further compression needed
-        if os.path.getsize(output_audio_path) > max_size_mb * 1024 * 1024:
+        # Check if compression needed
+        current_size = os.path.getsize(output_audio_path) / (1024 * 1024)  # Size in MB
+        if current_size > max_size_mb:
+            # Calculate target bitrate to achieve desired file size
+            target_bitrate = int((max_size_mb * 8 * 1024) / (current_size / max_size_mb))  # in kbps
             temp_path = output_audio_path + ".temp"
             os.rename(output_audio_path, temp_path)
 
@@ -39,11 +42,13 @@ def extract_audio(video_path, output_audio_path="audio.wav", max_size_mb=25):
                     "-i",
                     temp_path,
                     "-ar",
-                    "16000",
+                    "16000",  # Keep 16kHz sample rate
                     "-ac",
-                    "1",
+                    "1",  # Keep mono
                     "-b:a",
-                    "32k",  # Very aggressive compression
+                    f"{target_bitrate}k",  # Dynamic bitrate based on target size
+                    "-acodec",
+                    "libmp3lame",  # Use MP3 for better compression
                     "-y",
                     output_audio_path,
                 ],
