@@ -9,7 +9,7 @@ A Flask web application that generates Markdown documents by processing videos o
 
 ---
 
-Demo Video: [https://youtu.be/xHDUDiyhM9k](https://youtu.be/xHDUDiyhM9k)
+Demo Video: [https://youtu.be/xHDUDiyhM9k](https://www.youtube.com/watch?v=7Z2cGemTM9k)
 
 ## 🔗 Table of Contents
 
